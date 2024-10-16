@@ -17,7 +17,7 @@ Trabajo Práctico de Gestión de Desarrollo de Sistemas Informáticos - 2C2024
 6. Alejandro Nicolas Schamun - [GitHub](https://github.com/aleschamun)
 
 #### Product Owner: 
-- Maria Pilar Gaddi 
+- Maria Pilar Gaddi - [GitHub](https://github.com/mpiligaddi)
 
 ---
 
