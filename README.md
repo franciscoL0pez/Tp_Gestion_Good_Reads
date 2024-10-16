@@ -19,3 +19,11 @@ Trabajo Práctico de Gestión de Desarrollo de Sistemas Informáticos - 2C2024
 #### Product Owner: 
 - Maria Pilar Gaddi 
 
+---
+
+## Instalación y Ejecución del proyecto
+
+- Instalar `node.js` y `npm` en su sistema. [Descargar](https://nodejs.org/en/download/package-manager)
+- Correr el comando `npm install` en la carpeta raíz del proyecto para instalar las dependencias.
+- Correr el comando `npm run dev` para iniciar el servidor de desarrollo.
+- Abrir el navegador y acceder a `http://localhost:3000` para visualizar la aplicación.
