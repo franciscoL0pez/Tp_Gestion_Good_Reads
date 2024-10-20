@@ -40,14 +40,7 @@ const Login = () => {
     }
   };
   return (
-    <Flex
-      w={"100vw"}
-      h={"100vh"}
-      p={"10px"}
-      style={{
-        background: "#f5ebe2",
-      }}
-    >
+    <Flex w={"100vw"} h={"100vh"} p={"10px"} bg={"#f5ebe2"}>
       <Flex
         w={"100%"}
         h={"100%"}
