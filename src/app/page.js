@@ -25,7 +25,7 @@ export default function Home() {
             src="/images/logo.jpg" 
             width={180} // Ancho de la imagen
             height={180} // Alto de la imagen
-            priority // Carga prioritaria
+           
           />
         </Center>
 
