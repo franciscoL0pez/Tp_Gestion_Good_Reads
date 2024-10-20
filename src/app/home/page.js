@@ -1,19 +1,51 @@
-export default function HomePage() {
+"use client";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { signOut } from "firebase/auth";
+import { auth } from "@/components/register_and_log/firebase";
+import { Button, Flex, Spinner, Text } from "@chakra-ui/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-  
+export default function HomePage() {
+  const [user, loading] = useAuthState(auth);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading]);
+
   return (
-    <section
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        width: "100vw",
-        background: "gray.100",
-        fontSize: "3rem",
-      }}
+    <Flex
+      w={"100vw"}
+      h={"100vh"}
+      p={"10px"}
+      direction={"column"}
+      bg={"#f5ebe2"}
+      align={"center"}
+      justify={"center"}
     >
-      <h1>Home</h1>
-    </section>
+      <Text fontSize={"5xl"}>
+        {loading ? (
+          <Spinner />
+        ) : user ? (
+          `Bienvenido ${user.email}`
+        ) : (
+          "Inicia sesión"
+        )}
+      </Text>
+      {user && (
+        <Button
+          onClick={async () => {
+            await signOut(auth);
+            router.push("/login");
+          }}
+        >
+          Cerrar sesión
+        </Button>
+      )}
+    </Flex>
   );
 }
