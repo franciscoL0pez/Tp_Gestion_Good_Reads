@@ -6,7 +6,8 @@
   --button-primary-hover: #383838;
   --button-secondary-hover: #f2f2f2;
 
-  display: grid;
+  display: flex;
+  flex-direction: column;
   grid-template-rows: 20px 1fr 20px;
   align-items: center;
   justify-items: center;
@@ -15,6 +16,17 @@
   gap: 64px;
   font-family: var(--font-geist-sans);
 }
+.header {
+  width: 100%; /* Asegura que el header ocupe todo el ancho */
+  background-color: white; /* Cambia a negro o el color que prefieras */
+  padding: 20px; /* Espaciado alrededor del logo */
+  display: flex;
+  justify-content: center; /* Centra el logo horizontalmente */
+}
+.logo {
+  max-width: 100%; /* Asegúrate de que la imagen no sobresalga */
+  height: auto; /* Mantiene la proporción de la imagen */
+}
 
 @media (prefers-color-scheme: dark) {
   .page {
@@ -22,7 +34,7 @@
     --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
     --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
 
-    --button-primary-hover: #ccc;
+    --button-primary-hover: #292424;
     --button-secondary-hover: #1a1a1a;
   }
 }
