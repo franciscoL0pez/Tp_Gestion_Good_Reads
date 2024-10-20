@@ -16,11 +16,10 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <Center bg="tomato" h="100px" color="white">
-        <Image src="/images/logo.jpg" width={180} height={180} priority />
+        <Image src="/images/logo.jpg" width={180} height={180} />
       </Center>
 
       <main className={styles.main}>
-        {/* Sección con 5  imágenes */}
         <Box p={4} bg="gray.100">
           <SimpleGrid columns={[2, null, 5]} spacing="40px">
             <Image
