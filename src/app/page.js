@@ -1,5 +1,6 @@
 
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   ChakraProvider,
@@ -10,16 +11,17 @@ import {
   Button,
   Center,
   Text,
-  SimpleGrid,
   Accordion,
   AccordionItem,
   AccordionButton,
   AccordionIcon,
   AccordionPanel,
-} from "@chakra-ui/react"; 
+  SimpleGrid,
+} from "@chakra-ui/react";
 import styles from "./page.module.css";
 
 export default function Home() {
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -119,5 +121,6 @@ export default function Home() {
         )}
       </div>
     </ChakraProvider>
+
   );
 }

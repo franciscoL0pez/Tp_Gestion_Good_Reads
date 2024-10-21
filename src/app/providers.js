@@ -1,6 +1,11 @@
 "use client";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 
 export function Providers({ children }) {
-  return <ChakraProvider>{children}</ChakraProvider>;
+  return (
+    <ChakraProvider>
+      <ColorModeScript initialColorMode="light" />
+      {children}
+    </ChakraProvider>
+  );
 }
