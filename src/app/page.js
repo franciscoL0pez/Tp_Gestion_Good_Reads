@@ -1,7 +1,6 @@
-
 "use client";
-
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";  // Importa el useRouter
 import {
   ChakraProvider,
   Spinner,
@@ -23,6 +22,7 @@ import styles from "./page.module.css";
 export default function Home() {
 
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); 
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -112,8 +112,8 @@ export default function Home() {
                   </AccordionItem>
                 </Accordion>
                 <Stack spacing={4} mb={4} width="100%" alignItems="center" justifyContent="center" direction="row">
-                  <Button colorScheme="blue" onClick={() => alert("Iniciar Sesión")} width="200px">Iniciar Sesión</Button>
-                  <Button colorScheme="green" onClick={() => alert("Registrarse")} width="200px">Registrarse</Button>
+                  <Button colorScheme="blue" onClick={() => router.push("/login")} width="200px">Iniciar Sesión</Button>
+                  <Button colorScheme="green" onClick={()=> router.push("/register")} width="200px">Registrarse</Button>
                 </Stack>
               </Box>
             </div>
