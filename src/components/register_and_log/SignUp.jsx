@@ -128,7 +128,7 @@ const SignUp = () => {
             />
             <Button
               w={"80%"}
-              bg={"black"}
+              bg={"green.700"}
               color={"white"}
               _hover={{
                 opacity: 0.8,
@@ -141,7 +141,7 @@ const SignUp = () => {
             </Button>
             <Text>
               ¿Ya tienes una cuenta?{" "}
-              <Link href="/login" color={"blue.500"}>
+              <Link href="/login" color={"green.500"}>
                 Inicia sesión
               </Link>
             </Text>

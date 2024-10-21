@@ -89,13 +89,13 @@ const Login = () => {
             <Input
               bg={"white"}
               w={"80%"}
-              placeholder={"Contrseña"}
+              placeholder={"Contraseña"}
               type={"password"}
               onChange={(e) => setPassword(e.target.value)}
             />
             <Button
               w={"80%"}
-              bg={"black"}
+              bg={"green.700"}
               color={"white"}
               _hover={{
                 opacity: 0.8,
@@ -108,7 +108,7 @@ const Login = () => {
             </Button>
             <Text>
               ¿No tienes cuenta?{" "}
-              <Link href={"/register"} color={"blue.400"}>
+              <Link href={"/register"} color={"green.400"}>
                 Regístrate
               </Link>
             </Text>
