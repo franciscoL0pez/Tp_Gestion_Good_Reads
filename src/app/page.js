@@ -88,11 +88,9 @@ export default function Home() {
                     </h2>
                     <AccordionPanel pb={4}>
                     Es la plataforma ideal para lectores de todas las edades y autores que desean compartir sus obras. 
-                    Ofrecemos una experiencia de navegación excepcional que permite buscar, leer, opinar y compartir libros fácilmente.
-                    A diferencia de las bibliotecas tradicionales o plataformas de compra, FiuBooks es completamente gratuito y en la nube. 
+                    Ofrecemos una experiencia de navegación  que permite buscar, leer, opinar y compartir libros fácilmente.
                     Aceptamos libros escaneados y en varios idiomas, permitiendo a los escritores compartir sus obras sin intermediarios. 
-                    También contamos con secciones especiales para niños mayores de 8 años, fomentando el amor por 
-                    la lectura desde temprana edad.
+          
                     </AccordionPanel>
                   </AccordionItem>
                   <AccordionItem>
