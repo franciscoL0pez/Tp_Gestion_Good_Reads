@@ -3,22 +3,26 @@
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
   --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
 
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-
   display: flex;
   flex-direction: column;
   grid-template-rows: 20px 1fr 20px;
   align-items: center;
   justify-items: center;
-  min-height: 100svh;
+  min-height: 100vh; /* Cambiado a 100vh para ocupar toda la altura de la ventana */
   padding: 80px;
   gap: 64px;
   font-family: var(--font-geist-sans);
 }
+
+.footer-section {
+  background-color: gray.100; 
+  width: 100%; /* Asegura que ocupe todo el ancho */
+  padding: 20px; /* Espaciado */
+}
+
 .header {
   width: 100%; /* Asegura que el header ocupe todo el ancho */
-  background-color: white; /* Cambia a negro o el color que prefieras */
+  background-color: white; 
   padding: 20px; /* Espaciado alrededor del logo */
   display: flex;
   justify-content: center; /* Centra el logo horizontalmente */
@@ -33,9 +37,6 @@
     --gray-rgb: 255, 255, 255;
     --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
     --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
-
-    --button-primary-hover: #292424;
-    --button-secondary-hover: #1a1a1a;
   }
 }
 
@@ -105,6 +106,7 @@ a.secondary {
   grid-row-start: 3;
   display: flex;
   gap: 24px;
+ 
 }
 
 .footer a {

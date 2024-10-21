@@ -1,8 +1,22 @@
 
-"use client"; // Marca el componente como un Client Component
-
+"use client";
 import { useEffect, useState } from "react";
-import { ChakraProvider, Spinner, Box, Stack, Image, Button, Center, Link, SimpleGrid } from "@chakra-ui/react";
+import {
+  ChakraProvider,
+  Spinner,
+  Box,
+  Stack,
+  Image,
+  Button,
+  Center,
+  Text,
+  SimpleGrid,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionIcon,
+  AccordionPanel,
+} from "@chakra-ui/react"; 
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -13,98 +27,94 @@ export default function Home() {
       setLoading(false);
     }, 700); 
 
-    return () => clearTimeout(timer); // Limpia el timer si el componente se desmonta
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <ChakraProvider>
       <div className={styles.page}>
-        {/* Cabecera con el Center */}
         <Center bg="tomato" h="100px" color="white">
           <Image
             src="/images/logo.jpg" 
-            width={180} // Ancho de la imagen
-            height={180} // Alto de la imagen
-           
+            width={180}
+            height={180}
           />
         </Center>
 
         <main className={styles.main}>
-          
           {loading ? (
-            <>
-              <Spinner
-                size="xl"
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="green.500"
-                mt={4}
-              />
-            </>
+            <Spinner
+              size="xl"
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="green.500"
+              mt={4}
+            />
           ) : (
-            <>
-              {/* Sección con 5  imágenes */}
-              <Box p={4} bg="gray.100">
-             
+            <Box p={4} bg="gray.100" boxShadow="md" borderRadius="md">
               <SimpleGrid columns={[2, null, 5]} spacing="40px">
-                <Image 
-                  src="/images/DorianGrey.jpg" 
-                  alt="Dorian Grey" 
-                  borderRadius="md"
-                  boxShadow="md"
-                  transition="transform 0.2s"
-                  _hover={{ transform: "scale(1.05)" }} // Efecto hover
-                />
-                <Image 
-                  src="/images/ElExtranjero.jpg" 
-                  alt="El Extranjero" 
-                  borderRadius="md"
-                  boxShadow="md"
-                  transition="transform 0.2s"
-                  _hover={{ transform: "scale(1.05)" }} 
-                />
-                <Image 
-                  src="/images/LaMetaMorfosis.jpg" 
-                  alt="La Metamorfosis" 
-                  borderRadius="md"
-                  boxShadow="md"
-                  transition="transform 0.2s"
-                  _hover={{ transform: "scale(1.05)" }} 
-                />
-                <Image 
-                  src="/images/MasAlláDelInvierno.jpg" 
-                  alt="Más Allá Del Invierno" 
-                  borderRadius="md"
-                  boxShadow="md"
-                  transition="transform 0.2s"
-                  _hover={{ transform: "scale(1.05)" }} 
-                />
-                <Image 
-                  src="/images/PoesiaCompleta.jpg" 
-                  alt="Poesía Completa" 
-                  borderRadius="md"
-                  boxShadow="md"
-                  transition="transform 0.2s"
-                  _hover={{ transform: "scale(1.05)" }} 
-                />
+                <Image src="/images/DorianGrey.jpg" alt="Dorian Grey" borderRadius="md" boxShadow="md" transition="transform 0.2s" _hover={{ transform: "scale(1.05)" }} />
+                <Image src="/images/ElExtranjero.jpg" alt="El Extranjero" borderRadius="md" boxShadow="md" transition="transform 0.2s" _hover={{ transform: "scale(1.05)" }} />
+                <Image src="/images/LaMetaMorfosis.jpg" alt="La Metamorfosis" borderRadius="md" boxShadow="md" transition="transform 0.2s" _hover={{ transform: "scale(1.05)" }} />
+                <Image src="/images/MasAlláDelInvierno.jpg" alt="Más Allá Del Invierno" borderRadius="md" boxShadow="md" transition="transform 0.2s" _hover={{ transform: "scale(1.05)" }} />
+                <Image src="/images/PoesiaCompleta.jpg" alt="Poesía Completa" borderRadius="md" boxShadow="md" transition="transform 0.2s" _hover={{ transform: "scale(1.05)" }} />
               </SimpleGrid>
-              </Box>
-              
-            </>
+            </Box>
           )}
         </main>
         
-        {!loading && ( // El footer solo se mostrará si loading es false
+        {!loading && (
           <footer className={styles.footer}>
-            <Stack spacing={4} mb={4} width="100%" alignItems="center">
-              <Button colorScheme="blue" onClick={() => alert("Iniciar Sesión")}>
-                Iniciar Sesión
-              </Button>
-              <Button colorScheme="green" onClick={() => alert("Registrarse")}>
-                Registrarse
-              </Button>
-            </Stack>
+            <div className={styles.footerSection}>
+              <Box p={8} bg="gray.100" width="100%" boxShadow="md" borderRadius="md">
+                <Text mb={4} fontSize="lg" textAlign="center" fontWeight="bold" color="teal.700">Únete a FIU-Books</Text>
+                <Text mb={4} fontSize="md" textAlign="center">
+                  Disfruta de una amplia variedad de libros sin costo alguno y descubre nuevas 
+                  historias que enriquecerán tu vida,
+                  donde podrás organizar tus lecturas, interactuar con una 
+                  comunidad apasionada y descubrir nuevas obras según tus intereses.
+                  </Text>
+                
+               <Accordion allowMultiple mb={4}>
+                  <AccordionItem>
+                    <h2>
+                      <AccordionButton>
+                        <Box as='span' flex='1' textAlign='left'>¿Por qué FIU-Books?</Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                    Es la plataforma ideal para lectores de todas las edades y autores que desean compartir sus obras. 
+                    Ofrecemos una experiencia de navegación excepcional que permite buscar, leer, opinar y compartir libros fácilmente.
+                    A diferencia de las bibliotecas tradicionales o plataformas de compra, FiuBooks es completamente gratuito y en la nube. 
+                    Aceptamos libros escaneados y en varios idiomas, permitiendo a los escritores compartir sus obras sin intermediarios. 
+                    También contamos con secciones especiales para niños mayores de 8 años, fomentando el amor por 
+                    la lectura desde temprana edad.
+                    </AccordionPanel>
+                  </AccordionItem>
+                  <AccordionItem>
+                    {({ isExpanded }) => (
+                      <>
+                        <h2>
+                          <AccordionButton>
+                            <Box as='span' flex='1' textAlign='left'>¿Cómo Funciona?</Box>
+                            <AccordionIcon />
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel pb={4}>
+                          Simplemente regístrate, comienza a explorar y comparte tus libros favoritos con otros usuarios.
+                        </AccordionPanel>
+                      </>
+                    )}
+                  </AccordionItem>
+                </Accordion>
+                <Stack spacing={4} mb={4} width="100%" alignItems="center" justifyContent="center" direction="row">
+                  <Button colorScheme="blue" onClick={() => alert("Iniciar Sesión")} width="200px">Iniciar Sesión</Button>
+                  <Button colorScheme="green" onClick={() => alert("Registrarse")} width="200px">Registrarse</Button>
+                </Stack>
+              </Box>
+            </div>
           </footer>
         )}
       </div>
