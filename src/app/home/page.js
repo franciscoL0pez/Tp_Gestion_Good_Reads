@@ -37,14 +37,24 @@ export default function HomePage() {
         )}
       </Text>
       {user && (
-        <Button
-          onClick={async () => {
-            await signOut(auth);
-            router.push("/login");
-          }}
-        >
-          Cerrar sesión
-        </Button>
+        <>
+          <Button
+            mb={4}
+            onClick={() => {
+              router.push("/profile");
+            }}
+          >
+            Perfil
+          </Button>
+          <Button
+            onClick={async () => {
+              await signOut(auth);
+              router.push("/login");
+            }}
+          >
+            Cerrar sesión
+          </Button>
+        </>
       )}
     </Flex>
   );
