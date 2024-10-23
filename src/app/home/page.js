@@ -31,7 +31,7 @@ export default function HomePage() {
         {loading ? (
           <Spinner />
         ) : user ? (
-          `Bienvenido ${user.email}`
+          `Bienvenido ${user.displayName}`
         ) : (
           "Inicia sesión"
         )}

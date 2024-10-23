@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { auth } from "./firebase";
+import { getAuth, updateCurrentUser, updateProfile } from "firebase/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import {
   Button,
@@ -10,10 +11,16 @@ import {
   Link,
   Text,
   useToast,
+  NumberInput,
+  Select,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
 const SignUp = () => {
+  const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -23,6 +30,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       if (password !== repeatPassword) {
         toast({
@@ -34,14 +42,54 @@ const SignUp = () => {
         });
         return;
       }
+
+      if (!email || !password || !name || !lastName) {
+        toast({
+          title: "Error",
+          description: "Todos los campos son obligatorios",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+        return;
+      }
+
       setLoading(true);
 
-      await createUserWithEmailAndPassword(auth, email, password);
+      const auth = getAuth();
+
+      const useCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = useCredential.user;
+
+      await updateProfile(user, {
+        displayName: `${name} ${lastName}`,
+        // photoURL: "https://example.com/jane-q-user/profile.jpg",
+      });
+
+      console.log("User created:", user);
+
       router.push("/home");
-    } catch (err) {
+    } catch (error) {
+      // Handle Firebase-specific errors
+      let errorMessage = "Hubo un error al crear la cuenta, intente nuevamente";
+
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "El correo ya está en uso. Intente con otro.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "La contraseña es muy débil. Use al menos 6 caracteres.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "El formato del correo no es válido.";
+      }
+
+      console.log("Error creating new user:", error);
+
       toast({
         title: "Error",
-        description: "Hubo un error al crear la cuenta, intente nuevamente",
+        description: errorMessage,
         status: "error",
         duration: 9000,
         isClosable: true,
@@ -100,6 +148,46 @@ const SignUp = () => {
             gap={"20px"}
           >
             <Heading fontWeight={400}>¡Bienvenido!</Heading>
+            <Input
+              bg={"white"}
+              w={"80%"}
+              placeholder={"Nombre"}
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+            <Input
+              bg={"white"}
+              w={"80%"}
+              placeholder={"Apellido"}
+              onChange={(e) => {
+                setLastName(e.target.value);
+              }}
+            />
+            {/* <NumberInput
+              bg={"white"}
+              w={"80%"}
+              placeholder={"Edad"}
+              onChange={(e) => {
+                setAge(e.target.value);
+              }}
+            />
+            <Select
+              bg={"white"}
+              w={"80%"}
+              placeholder={"Género"}
+              onChange={(e) => {
+                setGender(e.target.value);
+              }}
+            /> */}
+            {/* <Select
+              bg={"white"}
+              w={"80%"}
+              placeholder={"País"}
+              onChange={(e) => {
+                setCountry(e.target.value);
+              }}
+            > */}
             <Input
               bg={"white"}
               w={"80%"}
