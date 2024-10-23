@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
 // import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -40,7 +40,19 @@ const UserProfile = () => {
       direction={"column"}
       align={"center"}
     >
-      <Heading>Perfil de Usuario</Heading>
+      <Flex 
+        w={"100%"}
+        maxW={"500px"}
+        // margin={"20px"}
+        gap={"20px"}
+        align={"center"}
+      >
+        <Button>
+          <a href="/home">Volver</a>
+        </Button>
+        <Heading>Perfil de Usuario</Heading>
+
+      </Flex>
       <Box
         w={"100%"}
         maxW={"500px"}

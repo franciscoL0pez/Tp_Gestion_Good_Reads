@@ -27,15 +27,18 @@ export default function HomePage() {
       align={"center"}
       justify={"center"}
     >
-      <Text fontSize={"5xl"}>
-        {loading ? (
-          <Spinner />
-        ) : user ? (
-          `Bienvenido ${user.displayName}`
-        ) : (
-          "Inicia sesión"
-        )}
-      </Text>
+    
+      {loading ? (
+        <Spinner />
+      ) : user ? (
+        <Text fontSize={'5xl'}>
+          Bienvenido {user.displayName}
+        </Text>
+      ) : (
+        <Text fontSize={'5xl'}>
+          Inicia sesión
+        </Text>
+      )}
       {user && (
         <>
           <Button
