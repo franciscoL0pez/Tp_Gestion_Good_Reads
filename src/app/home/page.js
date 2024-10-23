@@ -31,20 +31,30 @@ export default function HomePage() {
         {loading ? (
           <Spinner />
         ) : user ? (
-          `Bienvenido ${user.email}`
+          `Bienvenido ${user.displayName}`
         ) : (
           "Inicia sesión"
         )}
       </Text>
       {user && (
-        <Button
-          onClick={async () => {
-            await signOut(auth);
-            router.push("/login");
-          }}
-        >
-          Cerrar sesión
-        </Button>
+        <>
+          <Button
+            mb={4}
+            onClick={() => {
+              router.push("/profile");
+            }}
+          >
+            Perfil
+          </Button>
+          <Button
+            onClick={async () => {
+              await signOut(auth);
+              router.push("/login");
+            }}
+          >
+            Cerrar sesión
+          </Button>
+        </>
       )}
     </Flex>
   );
