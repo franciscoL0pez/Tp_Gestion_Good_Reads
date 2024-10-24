@@ -4,35 +4,17 @@
 import React from "react";
 import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 // import { useAuth } from "@/lib/auth";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { app } from "@/components/register_and_log/firebase";
 
 const UserProfile = () => {
   const auth = getAuth(app);
   const user = auth.currentUser;
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/login");
-      } else {
-        setLoading(false);
-      }
-    });
-  }, []);
-
-  if (loading) {
-    return <Heading>Loading...</Heading>;
-  }
 
   return (
     <Flex
-      w={"100vw"}
-      h={"100vh"}
+      w={"100%"}
+      h={"100%"}
       p={"10px"}
       style={{
         background: "gray.100",
