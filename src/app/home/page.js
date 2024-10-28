@@ -1,6 +1,6 @@
 "use client";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/components/register_and_log/firebase";
+import { auth } from "@/services/firebase";
 import { Button, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 
 export default function HomePage() {

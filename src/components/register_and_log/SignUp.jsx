@@ -1,20 +1,19 @@
 "use client";
 import React, { useState } from "react";
-import { auth } from "./firebase";
-import { getAuth, updateCurrentUser, updateProfile } from "firebase/auth";
+import { getAuth, updateProfile } from "firebase/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import {
   Button,
+  Checkbox,
   Flex,
   Heading,
   Input,
   Link,
   Text,
   useToast,
-  NumberInput,
-  Select,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
+import { createUser } from "@/services/users";
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -24,7 +23,9 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [isAuthor, setIsAuthor] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const toast = useToast();
 
@@ -58,16 +59,21 @@ const SignUp = () => {
 
       const auth = getAuth();
 
-      const useCredential = await createUserWithEmailAndPassword(
+      const { user } = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
-      const user = useCredential.user;
 
       await updateProfile(user, {
         displayName: `${name} ${lastName}`,
-        // photoURL: "https://example.com/jane-q-user/profile.jpg",
+      });
+
+      await createUser({
+        uid: user.uid,
+        isAuthor,
+        name,
+        lastName,
       });
 
       console.log("User created:", user);
@@ -214,6 +220,14 @@ const SignUp = () => {
               }}
               type={"password"}
             />
+            <Checkbox
+              isChecked={isAuthor}
+              onChange={(e) => {
+                setIsAuthor(e.target.checked);
+              }}
+            >
+              Soy autor
+            </Checkbox>
             <Button
               w={"80%"}
               bg={"green.700"}

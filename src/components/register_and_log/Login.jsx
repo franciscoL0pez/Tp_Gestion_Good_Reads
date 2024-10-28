@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { auth } from "./firebase";
+import { auth } from "@/services/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import {
   Button,
