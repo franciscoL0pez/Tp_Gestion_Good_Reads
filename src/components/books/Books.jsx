@@ -6,7 +6,7 @@ import PublishBookModal from "@/components/books/PublishBookModal";
 import { useBooks } from "@/hooks/useBooks";
 import ViewBookModal from "@/components/books/ViewBookModal";
 
-const BookCard = ({ book }) => {
+const BookCard = ({ book, onEdit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -37,14 +37,19 @@ const BookCard = ({ book }) => {
           }}
         />
       </Flex>
-      <ViewBookModal isOpen={isOpen} onClose={onClose} book={book} />
+      <ViewBookModal
+        isOpen={isOpen}
+        onClose={onClose}
+        book={book}
+        onEdit={onEdit}
+      />
     </Card>
   );
 };
 
 const Books = () => {
   const { userData, loading: userLoading } = useUserData();
-  const { books, loading: booksLoading, addBook } = useBooks();
+  const { books, loading: booksLoading, addBook, editBook } = useBooks();
 
   const loading = userLoading || booksLoading;
 
@@ -81,7 +86,7 @@ const Books = () => {
       />
       <Flex mt={"20px"} gap={"20px"} wrap={"wrap"} overflowY={"auto"} h={"90%"}>
         {books?.map((book) => (
-          <BookCard key={book.id} book={book} />
+          <BookCard key={book.id} book={book} onEdit={editBook} />
         ))}
       </Flex>
     </Skeleton>

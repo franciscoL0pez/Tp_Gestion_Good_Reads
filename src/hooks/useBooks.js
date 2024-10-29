@@ -20,5 +20,12 @@ export const useBooks = () => {
     setBooks([book, ...books]);
   };
 
-  return { books, loading, addBook };
+  const editBook = (book) => {
+    const index = books.findIndex((b) => b.id === book.id);
+    const newBooks = [...books];
+    newBooks[index] = book;
+    setBooks(newBooks);
+  };
+
+  return { books, loading, addBook, editBook };
 };

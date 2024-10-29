@@ -1,5 +1,11 @@
 import { db, storage } from "@/services/firebase";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getUser } from "@/services/users";
 
@@ -28,6 +34,39 @@ const createBook = async (bookData, pdf, cover) => {
     };
   } catch (e) {
     console.error("Error adding document:", e);
+    return null;
+  }
+};
+
+const updateBook = async (bookId, bookData, cover, pdf) => {
+  try {
+    const bookRef = doc(db, "books", bookId);
+    await updateDoc(bookRef, bookData);
+    const coverRef = ref(storage, `${bookData.uid}/books/${bookId}/cover`);
+    const pdfRef = ref(storage, `${bookData.uid}/books/${bookId}/pdf`);
+
+    if (cover) {
+      await uploadBytes(coverRef, cover);
+    }
+
+    if (pdf) {
+      await uploadBytes(pdfRef, pdf);
+    }
+
+    const author = await getUser(bookData.uid);
+
+    const pdfUrl = await getDownloadURL(pdfRef);
+    const coverUrl = await getDownloadURL(coverRef);
+
+    return {
+      id: bookId,
+      ...bookData,
+      pdf: pdfUrl,
+      cover: coverUrl,
+      author,
+    };
+  } catch (e) {
+    console.error("Error updating document:", e);
     return null;
   }
 };
@@ -65,4 +104,4 @@ const getBooks = async () => {
   }
 };
 
-export { createBook, getBooks };
+export { createBook, getBooks, updateBook };
