@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile, updateEmail, updatePassword } from "firebase/auth";
-import { auth, db } from "@/components/register_and_log/firebase";
+import { auth, db } from "@/services/firebase";
 import { Button, FormControl, FormLabel, Input, Box, Heading, useToast, Flex } from "@chakra-ui/react";
 
 const EditProfile = () => {
@@ -71,7 +71,9 @@ const EditProfile = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={10} p={5} shadow="md" borderWidth="1px">
+    <Box maxW="xl" mx="auto" mt={10} p={5} shadow="md" borderWidth="1px"
+      background={"white"} borderRadius={"md"} 
+    >
       <Heading as="h2" size="lg" mb={6}>
         Editar Perfil
       </Heading>
@@ -123,9 +125,9 @@ const EditProfile = () => {
         >
           <Button
             colorScheme="gray"
-            onClick={() => router.push("/profile")} 
+            onClick={() => router.push("/home/profile")} 
           >
-            <a href="/profile">Cancelar</a>
+            <a href="/home/profile">Cancelar</a>
           </Button>
           <Button
             colorScheme="teal"
