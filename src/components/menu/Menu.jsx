@@ -5,7 +5,7 @@ import { Book, Home2, Logout, Profile2User, User } from "iconsax-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
-import { auth } from "@/components/register_and_log/firebase";
+import { auth } from "@/services/firebase";
 
 const MenuLink = ({ href, children: icon, title }) => {
   const pathname = usePathname();
@@ -64,7 +64,6 @@ const Menu = () => {
         variant={"ghost"}
         onClick={async () => {
           await signOut(auth);
-          router.push("/login");
         }}
       >
         <Logout size="28" color="black" />

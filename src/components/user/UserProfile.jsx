@@ -5,7 +5,7 @@ import React from "react";
 import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 // import { useAuth } from "@/lib/auth";
 import { getAuth } from "firebase/auth";
-import { app } from "@/components/register_and_log/firebase";
+import { app } from "@/services/firebase";
 
 const UserProfile = () => {
   const auth = getAuth(app);
