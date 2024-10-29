@@ -68,6 +68,9 @@ const UserProfile = () => {
         <Text>
           <strong>Email:</strong> {user.email}
         </Text>
+        <Button>
+          <a href="/profile/edit">Editar Perfil</a>
+        </Button>
       </Box>
     </Flex>
   );
