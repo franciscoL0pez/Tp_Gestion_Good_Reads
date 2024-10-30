@@ -29,6 +29,8 @@ const PublishBookModal = ({
   const [user] = useAuthState(auth);
   const [title, setTitle] = useState(selectedBook?.title || "");
   const [plot, setPlot] = useState(selectedBook?.plot || "");
+  const [gender, setGender] = useState(selectedBook?.gender || "");
+  const [year, setYear] = useState(selectedBook?.year || "");
   const [pdf, setPdf] = useState(null);
   const [cover, setCover] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -54,6 +56,8 @@ const PublishBookModal = ({
         uid: user.uid,
         title,
         plot,
+        year,
+        gender,
       },
       pdf,
       cover,
@@ -159,6 +163,29 @@ const PublishBookModal = ({
             value={plot}
             onChange={(e) => setPlot(e.target.value)}
             h={"200px"}
+            resize={"none"}
+          />
+          <Box >
+            <Text>Seleccione Género del Libro </Text>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              resize={"none"}
+              h={"50px"}
+            >
+              <option value="Amor">Amor</option>
+              <option value="Ciencia Ficcion">Ciencia Ficcion</option>
+              <option value="Terror">Terror</option>
+              <option value="Misterio">Misterio</option>
+              <option value="No Ficcion">No Ficcion</option>
+              <option value="Autoayuda">Autoayuda</option>
+            </select>
+          </Box>
+          <Input
+            placeholder="Año"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            h={"50px"}
             resize={"none"}
           />
           <Box>

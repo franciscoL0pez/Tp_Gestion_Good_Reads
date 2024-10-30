@@ -71,6 +71,14 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
             {book?.plot}
           </Text>
         </ModalBody>
+        <ModalBody>
+          <Text>
+            Año de Publicación: {book?.year}
+          </Text>
+          <Text>
+            Genero: {book?.gender}
+          </Text>
+        </ModalBody>
         <ModalFooter>
           <Button colorScheme="gray" mr={3} onClick={onClose}>
             Cerrar

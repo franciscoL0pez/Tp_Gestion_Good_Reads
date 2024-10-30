@@ -13,7 +13,7 @@ const BookCard = ({ book, onEdit }) => {
     <Card
       onClick={onOpen}
       w={"250px"}
-      h={"350px"}
+      h={"370px"}
       p={"10px"}
       transition={"all 0.3s ease"}
       _hover={{
@@ -24,6 +24,9 @@ const BookCard = ({ book, onEdit }) => {
       <Flex direction={"column"} gap={"5px"}>
         <Text fontSize={"16px"} noOfLines={1}>
           {book.title}
+        </Text>
+        <Text fontSize={"12px"} noOfLines={1} fontWeight="bold">
+          {book.gender}
         </Text>
         <img
           src={book.cover}
