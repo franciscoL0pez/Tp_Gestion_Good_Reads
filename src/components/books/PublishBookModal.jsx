@@ -56,7 +56,7 @@ const PublishBookModal = ({
         plot,
       },
       pdf,
-      cover,
+      cover
     );
 
     if (createdBook) {
@@ -105,7 +105,7 @@ const PublishBookModal = ({
         plot,
       },
       cover,
-      pdf,
+      pdf
     );
 
     if (updatedBook) {

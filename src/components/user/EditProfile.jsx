@@ -1,9 +1,21 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile, updateEmail, updatePassword } from "firebase/auth";
-import { auth, db } from "@/services/firebase";
-import { Button, FormControl, FormLabel, Input, Box, Heading, useToast, Flex } from "@chakra-ui/react";
+import { auth, db, storage } from "@/services/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Box,
+  Heading,
+  useToast,
+  Flex,
+  Image,
+} from "@chakra-ui/react";
+import ImageUpload from "../ui/ImageInput";
 
 const EditProfile = () => {
   const user = auth.currentUser;
@@ -16,6 +28,16 @@ const EditProfile = () => {
   const [email, setEmail] = useState(user?.email || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(user.photoURL || "");
+
+  const handleImageChange = (file) => {
+    if (file) {
+      const imageUrl = URL.createObjectURL(file); // Create a preview URL
+      setImagePreview(imageUrl); // Update the preview
+      setImage(file);
+    }
+  };
 
   useEffect(() => {
     if (user?.displayName) {
@@ -31,21 +53,21 @@ const EditProfile = () => {
 
     try {
       if (user) {
-        // Update profile (name and last name)
+        // save image in storage
+        if (image) {
+          const storageRef = ref(storage, `users/${user.uid}/profile`);
+          await uploadBytes(storageRef, image);
+          const imageUrl = await getDownloadURL(storageRef);
+          await updateProfile(user, {
+            photoURL: imageUrl,
+          });
+        }
+
         if (name || lastName) {
           await updateProfile(user, {
             displayName: `${name} ${lastName}`,
           });
         }
-
-        // Update email
-        // if (email !== user.email) {
-        //   await updateEmail(user, email);
-
-        // Update password (optional)
-        // if (password) {
-        //   await updatePassword(user, password);
-        // }
 
         toast({
           title: "Perfil actualizado",
@@ -55,7 +77,7 @@ const EditProfile = () => {
           isClosable: true,
         });
 
-        router.push("/home"); // Redirect after successful update
+        router.push("/home/profile"); // Redirect after successful update
       }
     } catch (error) {
       toast({
@@ -71,14 +93,36 @@ const EditProfile = () => {
   };
 
   return (
-    <Box maxW="xl" mx="auto" mt={10} p={5} shadow="md" borderWidth="1px"
-      background={"white"} borderRadius={"md"} 
+    <Box
+      // maxW="xl"
+      maxWidth={"600px"}
+      width={"60%"}
+      mx="auto"
+      mt={10}
+      p={5}
+      shadow="md"
+      borderWidth="1px"
+      background={"white"}
+      borderRadius={"md"}
     >
       <Heading as="h2" size="lg" mb={6}>
         Editar Perfil
       </Heading>
 
+      <Flex justifyContent="center" mb={6}>
+        <Image
+          src={imagePreview || user.photoURL}
+          alt={user.displayName}
+          w={"200px"}
+          h={"200px"}
+          borderRadius={"full"}
+        />
+      </Flex>
       <form onSubmit={handleSubmit}>
+        <FormControl id="image" mb={4}>
+          <ImageUpload onImageChange={handleImageChange} />
+        </FormControl>
+
         <FormControl id="name" mb={4}>
           <FormLabel>Nombre</FormLabel>
           <Input
@@ -125,7 +169,7 @@ const EditProfile = () => {
         >
           <Button
             colorScheme="gray"
-            onClick={() => router.push("/home/profile")} 
+            onClick={() => router.push("/home/profile")}
           >
             <a href="/home/profile">Cancelar</a>
           </Button>
@@ -137,7 +181,6 @@ const EditProfile = () => {
           >
             Guardar Cambios
           </Button>
-
         </Flex>
       </form>
     </Box>

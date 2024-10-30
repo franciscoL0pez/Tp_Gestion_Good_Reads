@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
-// import { useAuth } from "@/lib/auth";
+import { Box, Button, Flex, Heading, Text, Image } from "@chakra-ui/react";
 import { getAuth } from "firebase/auth";
 import { app } from "@/services/firebase";
 
@@ -21,37 +20,48 @@ const UserProfile = () => {
       direction={"column"}
       align={"center"}
     >
-      <Flex 
-        w={"100%"}
-        maxW={"500px"}
-        // margin={"20px"}
-        gap={"20px"}
-        align={"center"}
-      >
-        <Button>
+      <Flex w={"80%"} maxW={"800px"} gap={"20px"} align={"center"}>
+        <Heading>Perfil de Usuario</Heading>
+        <Button ml="auto">
           <a href="/home">Volver</a>
         </Button>
-        <Heading>Perfil de Usuario</Heading>
-
       </Flex>
       <Box
-        w={"100%"}
-        maxW={"500px"}
+        w={"80%"}
+        maxW={"800px"}
         p={"20px"}
         my={"20px"}
         bg={"white"}
         boxShadow={"md"}
         borderRadius={"md"}
       >
-        <Text>
-          <strong>Nombre:</strong> {user.displayName}
-        </Text>
+        <Flex justifyContent={"flex-end"} mb={"10px"}>
+          <Button>
+            <a href="/home/profile/edit">Editar</a>
+          </Button>
+        </Flex>
+        <Flex
+          direction={"column"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          mb={"20px"}
+          marginBottom={"20px"}
+        >
+          <Image
+            src={user.photoURL}
+            alt={user.displayName}
+            w={"200px"}
+            h={"200px"}
+            borderRadius={"full"}
+          />
+          <Text mt={"10px"} fontSize={"50px"}>
+            {user.displayName}
+          </Text>
+        </Flex>
+
         <Text>
           <strong>Email:</strong> {user.email}
         </Text>
-        <Button marginTop={"20px"} ml={"auto"}>
-          <a href="/home/profile/edit">Editar Perfil</a>
-        </Button>
       </Box>
     </Flex>
   );
