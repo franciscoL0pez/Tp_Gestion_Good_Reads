@@ -26,7 +26,7 @@ const BookCard = ({ book, onEdit }) => {
           {book.title}
         </Text>
         <Text fontSize={"12px"} noOfLines={1} fontWeight="bold">
-          {book.gender}
+          {book.genders?.[0]}
         </Text>
         <img
           src={book.cover}

@@ -9,6 +9,8 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  Flex,
+  Box,
 } from "@chakra-ui/react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
@@ -53,31 +55,31 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
             fontWeight={"normal"}
             fontStyle={"italic"}
           >
-            {book?.author?.name + " " + book?.author?.lastName}
+            {book?.author?.name + " " + book?.author?.lastName + " - " + book?.year}
           </Text>
         </ModalHeader>
-        <ModalBody display={"flex"} gap={"40px"}>
-          <img
-            src={book?.cover}
-            alt={book?.title}
-            style={{
-              width: "200px",
-              height: "300px",
-              objectFit: "cover",
-              borderRadius: "10px",
-            }}
-          />
-          <Text fontSize={"16px"} textAlign={"justify"}>
-            {book?.plot}
-          </Text>
-        </ModalBody>
-        <ModalBody>
-          <Text>
-            Año de Publicación: {book?.year}
-          </Text>
-          <Text>
-            Genero: {book?.gender}
-          </Text>
+        <ModalBody display={"flex"} gap={"40px"} flexDirection={"column"}>
+          <Flex gap="40px">
+              <img
+              src={book?.cover}
+              alt={book?.title}
+              style={{
+                width: "200px",
+                height: "300px",
+                objectFit: "cover",
+                borderRadius: "10px",
+              }}
+            />
+            <Text fontSize={"16px"} textAlign={"justify"}>
+              {book?.plot}
+            </Text>
+          </Flex>
+          <Flex ml="2" gap="10px">
+              {book?.genders?.map(gender => {
+                return <Box py="4px" px="8px" bg="gray.200" borderRadius="8px">{gender}</Box>
+                })
+                }
+          </Flex>
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="gray" mr={3} onClick={onClose}>
