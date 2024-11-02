@@ -1,10 +1,11 @@
 "use client";
-import { Button, Card, Flex, Heading, Skeleton, Text } from "@chakra-ui/react";
+import { Button, Card, Flex, Heading, Input, Skeleton, Text } from "@chakra-ui/react";
 import { useUserData } from "@/hooks/useUserData";
 import { useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
 import { useBooks } from "@/hooks/useBooks";
 import ViewBookModal from "@/components/books/ViewBookModal";
+import { useState } from "react";
 
 const BookCard = ({ book, onEdit }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,6 +51,7 @@ const BookCard = ({ book, onEdit }) => {
 const Books = () => {
   const { userData, loading: userLoading } = useUserData();
   const { books, loading: booksLoading, addBook, editBook } = useBooks();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const loading = userLoading || booksLoading;
 
@@ -60,6 +62,11 @@ const Books = () => {
     onOpen: openPublishBookModal,
     onClose: closePublishBookModal,
   } = useDisclosure();
+
+  // Filtrar libros basados en el término de búsqueda
+  const filteredBooks = books?.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Skeleton
@@ -79,13 +86,22 @@ const Books = () => {
           </Button>
         )}
       </Flex>
+      <Flex mt={"20px"} gap={"20px"} align={"center"}>
+        {/* Caja de búsqueda */}
+        <Input
+          placeholder="Buscar libro por título..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          width={"300px"}
+        />
+      </Flex>
       <PublishBookModal
         isOpen={isPublishBookModalOpen}
         onClose={closePublishBookModal}
         onCreate={addBook}
       />
       <Flex mt={"20px"} gap={"20px"} wrap={"wrap"} overflowY={"auto"} h={"90%"}>
-        {books?.map((book) => (
+        {filteredBooks?.map((book) => (
           <BookCard key={book.id} book={book} onEdit={editBook} />
         ))}
       </Flex>
