@@ -14,10 +14,12 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { EditIcon, useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
+//Creo un estado para poder cambiarlo cuando añado el libro
+import { useState } from "react";
 
 const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
   const [user] = useAuthState(auth);
-
+  const [isBookAdded, setIsBookAdded] = useState(false);
   const isBookOwner = user?.uid === book?.author?.uid;
 
   const {
@@ -25,6 +27,12 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
     onOpen: openEditBookModal,
     onClose: closeEditBookModal,
   } = useDisclosure();
+
+  const handleAddToReadingList = () => {
+    setIsBookAdded(true);
+    
+  }
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
@@ -77,9 +85,13 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
           </Button>
           <Button
             colorScheme="green"
+            mr={3}
             onClick={() => window.open(book?.pdf, "_blank")}
           >
             Descargar
+          </Button>
+          <Button onClick={handleAddToReadingList} colorScheme="gray" isDisabled = {isBookAdded}>
+            {isBookAdded ? "Añadido" : "Añadir a lista de lecturas"}
           </Button>
         </ModalFooter>
       </ModalContent>
