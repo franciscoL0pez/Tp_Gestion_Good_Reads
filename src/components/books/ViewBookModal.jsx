@@ -9,6 +9,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
@@ -28,10 +29,18 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
     onClose: closeEditBookModal,
   } = useDisclosure();
 
+  const toast = useToast();
+
   const handleAddToReadingList = () => {
     setIsBookAdded(true);
-    
-  }
+    toast({
+      title: "Libro añadido",
+      description: `${book?.title} ha sido añadido a tu lista de lecturas.`,
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+  };
 
 
   return (
@@ -90,7 +99,11 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
           >
             Descargar
           </Button>
-          <Button onClick={handleAddToReadingList} colorScheme="gray" isDisabled = {isBookAdded}>
+          <Button
+            onClick={handleAddToReadingList}
+            colorScheme="gray"
+            isDisabled={isBookAdded}
+          >
             {isBookAdded ? "Añadido" : "Añadir a lista de lecturas"}
           </Button>
         </ModalFooter>
