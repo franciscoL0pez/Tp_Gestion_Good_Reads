@@ -14,8 +14,8 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import ViewBookModal from "@/components/books/ViewBookModal"; // Asegúrate de importar el modal
 
-// Componente para mostrar un libro y permitir moverlo entre las listas
 const BookItem = ({ book, onMove, inProgress }) => {
   return (
     <Card
@@ -57,18 +57,12 @@ const BookItem = ({ book, onMove, inProgress }) => {
   );
 };
 
-// Componente principal que contiene las listas de libros
-const Books = () => {
-  const [booksInProgress, setBooksInProgress] = useState([
-    { id: 1, title: "Clean Code", image: "https://m.media-amazon.com/images/I/41xShlnTZTL._SX218_BO1,204,203,200_QL40_FMwebp_.jpg" },
-  ]);
-
-  const [completedBooks, setCompletedBooks] = useState([
-    { id: 4, title: "JavaScript", image: "https://m.media-amazon.com/images/I/51XhEC2yfvL._SX218_BO1,204,203,200_QL40_FMwebp_.jpg" },
-    { id: 5, title: "Patrones de Diseño", image: "https://m.media-amazon.com/images/I/51MzUZtKqPL._SX404_BO1,204,203,200_.jpg" },
-  ]);
-
+const BooksList = () => {
+  const [booksInProgress, setBooksInProgress] = useState([]);
+  const [completedBooks, setCompletedBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isViewBookModalOpen, setViewBookModalOpen] = useState(false);
 
   const markAsCompleted = (book) => {
     setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
@@ -88,23 +82,26 @@ const Books = () => {
     book.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const addBookToReadingList = (book) => {
+    setBooksInProgress((prev) => [...prev, book]);
+    setViewBookModalOpen(false); // Cerrar el modal después de añadir el libro
+  };
+
+  const openViewBookModal = (book) => {
+    setSelectedBook(book);
+    setViewBookModalOpen(true);
+  };
+
   return (
     <Skeleton padding={"5%"} w={"100%"} h={"100%"} borderRadius={"20px"} isLoaded={true}>
       <Flex justify={"space-between"} align={"center"} mb={"30px"}>
-        <Heading fontWeight={500} fontSize={"40px"} color="teal.600">
+        <Heading fontWeight={500} fontSize={"40px"} color="dark">
           Mis libros
         </Heading>
       </Flex>
 
       <Flex justifyContent="space-between">
-        <Box
-          bg={"white"}
-          p={"25px"}
-          borderRadius={"15px"}
-          boxShadow="lg"
-          maxW={"70%"}
-        >
-          {/* Sección de Lecturas en Curso */}
+        <Box bg={"white"} p={"25px"} borderRadius={"15px"} boxShadow="lg" maxW={"70%"}>
           <Box mb={"30px"}>
             <Heading fontSize={"28px"} mb={"20px"} color="teal.500">
               Leyendo ahora
@@ -123,7 +120,6 @@ const Books = () => {
             </VStack>
           </Box>
 
-          {/* Sección de Lecturas Completadas */}
           <Box>
             <Heading fontSize={"28px"} mb={"20px"} color="teal.500">
               Lecturas completadas
@@ -143,11 +139,24 @@ const Books = () => {
           </Box>
         </Box>
       </Flex>
+
+      {selectedBook && (
+        <ViewBookModal
+          isOpen={isViewBookModalOpen}
+          onClose={() => setViewBookModalOpen(false)}
+          book={selectedBook}
+          onEdit={() => {}} // Implementa la lógica de edición aquí
+          onAddToReadingList={addBookToReadingList} // Pasar la función
+        />
+      )}
     </Skeleton>
   );
 };
 
-export default Books;
+export default BooksList;
+
+
+
 
 
 

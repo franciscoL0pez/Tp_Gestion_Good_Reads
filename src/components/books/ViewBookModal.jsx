@@ -15,10 +15,9 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { EditIcon, useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
-//Creo un estado para poder cambiarlo cuando añado el libro
 import { useState } from "react";
 
-const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
+const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) => {
   const [user] = useAuthState(auth);
   const [isBookAdded, setIsBookAdded] = useState(false);
   const isBookOwner = user?.uid === book?.author?.uid;
@@ -32,16 +31,18 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
   const toast = useToast();
 
   const handleAddToReadingList = () => {
-    setIsBookAdded(true);
-    toast({
-      title: "Libro añadido",
-      description: `${book?.title} ha sido añadido a tu lista de lecturas.`,
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
+    if (!isBookAdded) {
+      setIsBookAdded(true);
+      onAddToReadingList(book); // Añade el libro a la lista
+      toast({
+        title: "Libro añadido",
+        description: `${book?.title} ha sido añadido a tu lista de lecturas.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
-
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
@@ -111,7 +112,7 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
       <PublishBookModal
         isOpen={isEditBookModalOpen}
         onClose={closeEditBookModal}
-        selectedBook={book}
+        book={book}
         onEdit={onEdit}
       />
     </Modal>
@@ -119,3 +120,4 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
 };
 
 export default ViewBookModal;
+

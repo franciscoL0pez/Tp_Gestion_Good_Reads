@@ -1,13 +1,13 @@
 "use client";
 import { Button, Card, Flex, Heading, Input, Skeleton, Text } from "@chakra-ui/react";
 import { useUserData } from "@/hooks/useUserData";
-import { useDisclosure } from "@chakra-ui/icons";
+import { useDisclosure } from "@chakra-ui/react"; // Cambiado de '@chakra-ui/icons' a '@chakra-ui/react'
 import PublishBookModal from "@/components/books/PublishBookModal";
 import { useBooks } from "@/hooks/useBooks";
 import ViewBookModal from "@/components/books/ViewBookModal";
 import { useState } from "react";
 
-const BookCard = ({ book, onEdit }) => {
+const BookCard = ({ book, onEdit, onAddToReadingList }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -43,6 +43,7 @@ const BookCard = ({ book, onEdit }) => {
         onClose={onClose}
         book={book}
         onEdit={onEdit}
+        onAddToReadingList={onAddToReadingList} // Pasamos la función aquí
       />
     </Card>
   );
@@ -54,7 +55,6 @@ const Books = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const loading = userLoading || booksLoading;
-
   const isAuthor = userData?.isAuthor;
 
   const {
@@ -67,6 +67,12 @@ const Books = () => {
   const filteredBooks = books?.filter((book) =>
     book.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Función para añadir un libro a la lista de lectura
+  const handleAddToReadingList = (book) => {
+    console.log(`${book.title} añadido a la lista de lectura`);
+    // Aquí puedes implementar la lógica para añadir el libro a la lista
+  };
 
   return (
     <Skeleton
@@ -102,7 +108,12 @@ const Books = () => {
       />
       <Flex mt={"20px"} gap={"20px"} wrap={"wrap"} overflowY={"auto"} h={"90%"}>
         {filteredBooks?.map((book) => (
-          <BookCard key={book.id} book={book} onEdit={editBook} />
+          <BookCard 
+            key={book.id} 
+            book={book} 
+            onEdit={editBook} 
+            onAddToReadingList={handleAddToReadingList} // Pasamos la función aquí
+          />
         ))}
       </Flex>
     </Skeleton>
@@ -110,4 +121,5 @@ const Books = () => {
 };
 
 export default Books;
+
 
