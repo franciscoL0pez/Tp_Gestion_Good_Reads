@@ -15,6 +15,10 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { EditIcon, useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
+
+
+import { Star1 } from "iconsax-react";
+import ReviewsModal from "@/components/books/ReviewsModal";
 import { useState } from "react";
 
 const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) => {
@@ -43,6 +47,19 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
       });
     }
   };
+  const {
+    isOpen: isReviewsModalOpen,
+    onOpen: openReviewsModal,
+    onClose: closeReviewsModal,
+  } = useDisclosure();
+
+  const averageRating =
+    book?.reviews.reduce((acc, review) => acc + review.rating, 0) /
+    book?.reviews.length;
+
+  const ratingString = isNaN(averageRating)
+    ? "Sin calificaciones"
+    : averageRating.toFixed(1);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
@@ -67,11 +84,19 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
           <Text
             fontSize={"20px"}
             color={"gray.500"}
-            display={"inline"}
+            display={"flex"}
             fontWeight={"normal"}
             fontStyle={"italic"}
+            alignItems={"center"}
           >
-            {book?.author?.name + " " + book?.author?.lastName}
+            {book?.author?.name + " " + book?.author?.lastName} - {ratingString}{" "}
+            <Star1
+              size="16"
+              variant={"Bold"}
+              style={{
+                marginLeft: "5px",
+              }}
+            />
           </Text>
         </ModalHeader>
         <ModalBody display={"flex"} gap={"40px"}>
@@ -90,9 +115,10 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
           </Text>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="gray" mr={3} onClick={onClose}>
-            Cerrar
+          <Button colorScheme="gray" mr={3} onClick={openReviewsModal}>
+            Ver reseñas
           </Button>
+
           <Button
             colorScheme="green"
             mr={3}
@@ -113,6 +139,12 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
         isOpen={isEditBookModalOpen}
         onClose={closeEditBookModal}
         book={book}
+        onEdit={onEdit}
+      />
+      <ReviewsModal
+        book={book}
+        isOpen={isReviewsModalOpen}
+        onClose={closeReviewsModal}
         onEdit={onEdit}
       />
     </Modal>

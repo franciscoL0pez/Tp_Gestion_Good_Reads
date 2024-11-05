@@ -1,5 +1,13 @@
 "use client";
-import { Button, Card, Flex, Heading, Input, Skeleton, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Card,
+  Flex,
+  Heading,
+  Input,
+  Skeleton,
+  Text,
+} from "@chakra-ui/react";
 import { useUserData } from "@/hooks/useUserData";
 import { useDisclosure } from "@chakra-ui/react"; // Cambiado de '@chakra-ui/icons' a '@chakra-ui/react'
 import PublishBookModal from "@/components/books/PublishBookModal";
@@ -65,7 +73,7 @@ const Books = () => {
 
   // Filtrar libros basados en el término de búsqueda
   const filteredBooks = books?.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+    book.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Función para añadir un libro a la lista de lectura
@@ -106,7 +114,7 @@ const Books = () => {
         onClose={closePublishBookModal}
         onCreate={addBook}
       />
-      <Flex mt={"20px"} gap={"20px"} wrap={"wrap"} overflowY={"auto"} h={"90%"}>
+      <Flex mt={"20px"} gap={"20px"} wrap={"wrap"} overflowY={"auto"} h={"80%"}>
         {filteredBooks?.map((book) => (
           <BookCard 
             key={book.id} 
@@ -121,5 +129,3 @@ const Books = () => {
 };
 
 export default Books;
-
-
