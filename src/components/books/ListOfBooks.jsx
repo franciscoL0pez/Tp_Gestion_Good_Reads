@@ -59,7 +59,7 @@ const BookItem = ({ book, onMove, inProgress }) => {
 
 const BooksList = () => {
   const [booksInProgress, setBooksInProgress] = useState([
-    { id: 1, title: "El Alquimista", image: "fotosPrueba/ElAlquimista.png" },
+    { id: 1, title: "El Alquimista", image: "ElAlquimista.png" },
     { id: 2, title: "1984", image: "1984.png" },
     // Agrega más libros para probar el scroll
     { id: 3, title: "Cien años de soledad", image: "fotosPrueba/Cien_años_de_soledad.png" },
