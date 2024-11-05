@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getUser } from "@/services/users";
+import { getReviews } from "@/services/reviews";
 
 const createBook = async (bookData, pdf, cover) => {
   try {
@@ -31,6 +32,7 @@ const createBook = async (bookData, pdf, cover) => {
       pdf: pdfUrl,
       cover: coverUrl,
       author,
+      reviews: [],
     };
   } catch (e) {
     console.error("Error adding document:", e);
@@ -58,12 +60,15 @@ const updateBook = async (bookId, bookData, cover, pdf) => {
     const pdfUrl = await getDownloadURL(pdfRef);
     const coverUrl = await getDownloadURL(coverRef);
 
+    const reviews = await getReviews(bookId);
+
     return {
       id: bookId,
       ...bookData,
       pdf: pdfUrl,
       cover: coverUrl,
       author,
+      reviews,
     };
   } catch (e) {
     console.error("Error updating document:", e);
@@ -88,12 +93,15 @@ const getBooks = async () => {
 
       const author = await getUser(doc.data().uid);
 
+      const reviews = await getReviews(doc.id);
+
       return {
         id: doc.id,
         ...doc.data(),
         pdf: pdfUrl,
         cover: coverUrl,
         author,
+        reviews,
       };
     });
 
