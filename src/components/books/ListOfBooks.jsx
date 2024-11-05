@@ -14,39 +14,42 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import ViewBookModal from "@/components/books/ViewBookModal"; 
+import ViewBookModal from "@/components/books/ViewBookModal";
 
 const BookItem = ({ book, onMove, inProgress }) => {
   return (
     <Card
-      p={"5px"} 
-      w={"100%"}
+      p="15px"
+      w="100%"
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      mb={"10px"} 
-      bg={"gray.50"}
+      mb="10px"
+      bg="white"
       borderWidth="1px"
-      borderRadius={"10px"}
-      _hover={{ boxShadow: "lg", bg: "gray.100" }}
+      borderRadius="10px"
+      boxShadow="md"
+      _hover={{ boxShadow: "lg", transform: "translateY(-5px)", bg: "gray.50" }}
       transition="all 0.3s ease"
     >
-      <HStack spacing={2}>
-        <Image
-          src={book.image}
-          alt={book.title}
-          boxSize="50px" 
-          objectFit="cover"
-          borderRadius={"5px"}
-        />
-        <Text fontSize={"14px"} fontWeight="600" color="gray.700" noOfLines={1}>
+      <HStack spacing={4} alignItems="center">
+        <Box boxSize="60px" display="flex" justifyContent="center" alignItems="center">
+          <Image
+            src={`/fotosPrueba/${book.image}`}
+            alt={book.title}
+            boxSize="100%"
+            objectFit="cover"
+            borderRadius="5px"
+          />
+        </Box>
+        <Text fontSize="16px" fontWeight="bold" color="gray.700" noOfLines={1}>
           {book.title}
         </Text>
       </HStack>
       <Button
         colorScheme={inProgress ? "blue" : "green"}
         variant="solid"
-        size="sm" 
+        size="sm"
         onClick={() => onMove(book)}
         _hover={{ transform: "scale(1.05)" }}
         transition="all 0.2s ease"
@@ -59,18 +62,11 @@ const BookItem = ({ book, onMove, inProgress }) => {
 
 const BooksList = () => {
   const [booksInProgress, setBooksInProgress] = useState([
-    { id: 1, title: "El Alquimista", image: "ElAlquimista.png" },
+    { id: 1, title: "El Alquimista", image: "ElAlquimista.jpg" },
     { id: 2, title: "1984", image: "1984.png" },
-    // Agrega más libros para probar el scroll
-    { id: 3, title: "Cien años de soledad", image: "fotosPrueba/Cien_años_de_soledad.png" },
-    { id: 4, title: "El Principito", image: "fotosPrueba/ElPrincipito.png" },
-    { id: 5, title: "Don Quijote de la Mancha", image: "fotosPrueba/DonQuijote.png" },
-    { id: 6, title: "Crimen y Castigo", image: "fotosPrueba/CrimenyCastigo.png" },
-    // Más libros...
   ]);
   const [completedBooks, setCompletedBooks] = useState([
-    { id: 7, title: "Orgullo y Prejuicio", image: "fotosPrueba/OrgullosyPrejuicio.png" },
-    { id: 8, title: "Moby Dick", image: "fotosPrueba/MobyDick.png" },
+    { id: 3, title: "Moby Dick", image: "MobyDick.webp" },
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBook, setSelectedBook] = useState(null);
@@ -96,7 +92,7 @@ const BooksList = () => {
 
   const addBookToReadingList = (book) => {
     setBooksInProgress((prev) => [...prev, book]);
-    setViewBookModalOpen(false); // Cerrar el modal después de añadir el libro
+    setViewBookModalOpen(false);
   };
 
   const openViewBookModal = (book) => {
@@ -105,48 +101,60 @@ const BooksList = () => {
   };
 
   return (
-    <Skeleton padding={"5%"} w={"100%"} h={"100%"} borderRadius={"20px"} isLoaded={true}>
-      <Flex justify={"space-between"} align={"center"} mb={"30px"}>
-        <Heading fontWeight={500} fontSize={"24px"} color="dark"> {/* Disminuir el tamaño del encabezado */}
-          Mis libros
+    <Skeleton padding="5%" w="100%" h="100%" borderRadius="20px" isLoaded={true}>
+      <Flex justify="space-between" align="center" mb="30px">
+        <Heading
+          fontWeight={600}
+          fontSize="26px"
+          bgGradient="linear(to-r, teal.500, green.500)"
+          bgClip="text"
+        >
+          Mis Libros
         </Heading>
       </Flex>
 
-      <Flex justifyContent="flex-start" wrap="wrap" maxW="35%"> {/* Cambiar a '35%' */}
-        <Box bg={"white"} p={"15px"} borderRadius={"15px"} boxShadow="lg" maxW={"90%"} flex="1" minW={"200px"}> {/* Ajustar el ancho máximo y mínimo */}
-          <Box mb={"30px"}>
-            <Heading fontSize={"20px"} mb={"20px"} color="teal.500"> {/* Disminuir el tamaño del encabezado */}
-              Leyendo ahora
+      <Flex justifyContent="flex-start" wrap="wrap" maxW="35%">
+        <Box
+          bg="white"
+          p="20px"
+          borderRadius="15px"
+          boxShadow="xl"
+          maxW="90%"
+          flex="1"
+          minW="250px"
+        >
+          <Box mb="30px">
+            <Heading fontSize="22px" mb="15px" color="teal.600">
+              Leyendo Ahora
             </Heading>
-            <Divider mb={"15px"} />
-            <Box maxH="300px" overflowY="auto"> {/* Agregar barra de desplazamiento */}
-              <VStack spacing={2} align="stretch">
+            <Divider mb="15px" />
+            <Box maxH="300px" overflowY="auto">
+              <VStack spacing={4} align="stretch">
                 {filteredInProgress.length > 0 ? (
                   filteredInProgress.map((book) => (
                     <BookItem key={book.id} book={book} onMove={markAsCompleted} inProgress />
                   ))
                 ) : (
-                  <Text fontSize={"14px"} color="gray.600">
+                  <Text fontSize="14px" color="gray.600">
                     No tienes libros en curso.
                   </Text>
                 )}
               </VStack>
             </Box>
           </Box>
-
           <Box>
-            <Heading fontSize={"20px"} mb={"20px"} color="teal.500"> {/* Disminuir el tamaño del encabezado */}
-              Lecturas completadas
+            <Heading fontSize="22px" mb="15px" color="teal.600">
+              Lecturas Completadas
             </Heading>
-            <Divider mb={"15px"} />
-            <Box maxH="300px" overflowY="auto"> {/* Agregar barra de desplazamiento */}
-              <VStack spacing={2} align="stretch">
+            <Divider mb="15px" />
+            <Box maxH="300px" overflowY="auto">
+              <VStack spacing={4} align="stretch">
                 {filteredCompleted.length > 0 ? (
                   filteredCompleted.map((book) => (
                     <BookItem key={book.id} book={book} onMove={moveToInProgress} />
                   ))
                 ) : (
-                  <Text fontSize={"14px"} color="gray.600">
+                  <Text fontSize="14px" color="gray.600">
                     No tienes libros completados.
                   </Text>
                 )}
@@ -169,13 +177,4 @@ const BooksList = () => {
 };
 
 export default BooksList;
-
-
-
-
-
-
-
-
-
 
