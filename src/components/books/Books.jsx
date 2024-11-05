@@ -15,7 +15,7 @@ import { useBooks } from "@/hooks/useBooks";
 import ViewBookModal from "@/components/books/ViewBookModal";
 import { useState } from "react";
 
-const BookCard = ({ book, onEdit, onAddToReadingList }) => {
+const BookCard = ({ book, onEdit, onAddToReadingList , onRemoveFromReadingList}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -52,6 +52,7 @@ const BookCard = ({ book, onEdit, onAddToReadingList }) => {
         book={book}
         onEdit={onEdit}
         onAddToReadingList={onAddToReadingList} // Pasamos la función aquí
+        onRemoveFromReadingList={onRemoveFromReadingList}
       />
     </Card>
   );
@@ -79,7 +80,13 @@ const Books = () => {
   // Función para añadir un libro a la lista de lectura
   const handleAddToReadingList = (book) => {
     console.log(`${book.title} añadido a la lista de lectura`);
-    // Aquí puedes implementar la lógica para añadir el libro a la lista
+  
+  };
+
+  //Aca la logica para quitar
+  const handleRemoveFromReadingList = (book) => {
+    console.log(`${book.title} Libro eliminado de la lectura`)
+
   };
 
   return (
@@ -121,6 +128,7 @@ const Books = () => {
             book={book} 
             onEdit={editBook} 
             onAddToReadingList={handleAddToReadingList} // Pasamos la función aquí
+            onRemoveFromReadingList={handleRemoveFromReadingList}
           />
         ))}
       </Flex>

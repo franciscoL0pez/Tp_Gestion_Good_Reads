@@ -90,9 +90,16 @@ const BooksList = () => {
     book.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  //Añado el libro
   const addBookToReadingList = (book) => {
     setBooksInProgress((prev) => [...prev, book]);
     setViewBookModalOpen(false);
+  };
+
+  //Borro el libro de la lista
+  const removeBookFromReadingList = (book) => {
+    setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
+    setViewBookModalOpen(false); 
   };
 
   const openViewBookModal = (book) => {
@@ -170,6 +177,7 @@ const BooksList = () => {
           onClose={() => setViewBookModalOpen(false)}
           book={selectedBook}
           onAddToReadingList={addBookToReadingList}
+          onRemoveFromReadingList={removeBookFromReadingList}
         />
       )}
     </Skeleton>

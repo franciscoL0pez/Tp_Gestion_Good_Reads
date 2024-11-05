@@ -16,12 +16,11 @@ import { auth } from "@/services/firebase";
 import { EditIcon, useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
 
-
 import { Star1 } from "iconsax-react";
 import ReviewsModal from "@/components/books/ReviewsModal";
 import { useState } from "react";
 
-const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) => {
+const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRemoveFromReadingList }) => {
   const [user] = useAuthState(auth);
   const [isBookAdded, setIsBookAdded] = useState(false);
   const isBookOwner = user?.uid === book?.author?.uid;
@@ -37,7 +36,7 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
   const handleAddToReadingList = () => {
     if (!isBookAdded) {
       setIsBookAdded(true);
-      onAddToReadingList(book); // Añade el libro a la lista
+      onAddToReadingList(book); 
       toast({
         title: "Libro añadido",
         description: `${book?.title} ha sido añadido a tu lista de lecturas.`,
@@ -47,6 +46,21 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
       });
     }
   };
+
+  const handleRemoveFromReadingList = () => {
+    if (isBookAdded) {
+      setIsBookAdded(false);
+      onRemoveFromReadingList(book); 
+      toast({
+        title: "Libro eliminado",
+        description: `${book?.title} ha sido eliminado de tu lista de lecturas.`,
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
   const {
     isOpen: isReviewsModalOpen,
     onOpen: openReviewsModal,
@@ -126,13 +140,21 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
           >
             Descargar
           </Button>
-          <Button
-            onClick={handleAddToReadingList}
-            colorScheme="gray"
-            isDisabled={isBookAdded}
-          >
-            {isBookAdded ? "Añadido" : "Añadir a lista de lecturas"}
-          </Button>
+          {isBookAdded ? (
+            <Button
+              onClick={handleRemoveFromReadingList} //Lo quito de la lista
+              colorScheme="red" 
+            >
+              Quitar de lista de lecturas
+            </Button>
+          ) : (
+            <Button
+              onClick={handleAddToReadingList}
+              colorScheme="gray"
+            >
+              Añadir a lista de lecturas
+            </Button>
+          )}
         </ModalFooter>
       </ModalContent>
       <PublishBookModal
@@ -152,4 +174,5 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList }) =>
 };
 
 export default ViewBookModal;
+
 
