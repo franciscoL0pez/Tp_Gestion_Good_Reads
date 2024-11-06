@@ -78,7 +78,7 @@ const UserProfile = () => {
           <strong>Email:</strong> {user.email}
         </Text>
         <Text mt={"10px"}>
-          <strong>Edad:</strong> 24
+          <strong>Edad:</strong> {userData.age || "No age available"}
         </Text>
         <Text mt={"10px"}>
           <strong>Género:</strong> Hombre

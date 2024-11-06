@@ -37,15 +37,14 @@ const EditProfile = () => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(user.photoURL || "");
   const [selectedGenres, setSelectedGenres] = useState(userData?.genres || []);
+  const [age, setAge] = useState(userData?.age || "");
 
-  // FIJATE QUE ESTO YA ESTABA MAS ABAJO
   useEffect(() => {
     if (userData) {
       setSelectedGenres(userData.genres || []);
+      setAge(userData.age || "");
     }
   }, [userData]);
-
-  console.log(selectedGenres);
 
   const handleImageChange = (file) => {
     if (file) {
@@ -91,6 +90,7 @@ const EditProfile = () => {
           lastName,
           email,
           genres: selectedGenres,
+          age,
         });
 
         toast({
@@ -185,6 +185,16 @@ const EditProfile = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Nueva contraseña (dejar en blanco para no cambiar)"
+          />
+        </FormControl>
+
+        <FormControl id="age" mb={4}>
+          <FormLabel>Edad</FormLabel>
+          <Input
+            type="number"
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+            placeholder="Tu edad"
           />
         </FormControl>
 
