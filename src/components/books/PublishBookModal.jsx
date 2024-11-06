@@ -13,11 +13,20 @@ import {
   Text,
   Textarea,
   useToast,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { createBook, updateBook } from "@/services/books";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
+
+import Select from 'react-select';
+import { gendersOptions } from "@/data/genders";
 
 const PublishBookModal = ({
   isOpen,
@@ -29,6 +38,8 @@ const PublishBookModal = ({
   const [user] = useAuthState(auth);
   const [title, setTitle] = useState(selectedBook?.title || "");
   const [plot, setPlot] = useState(selectedBook?.plot || "");
+  const [genders, setGenders] = useState(selectedBook?.genders?.map(gender => ({label: gender, value: gender})) || []);
+  const [year, setYear] = useState(selectedBook?.year || "");
   const [pdf, setPdf] = useState(null);
   const [cover, setCover] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -54,6 +65,8 @@ const PublishBookModal = ({
         uid: user.uid,
         title,
         plot,
+        year,
+        genders: genders.map(gender => gender.value),
       },
       pdf,
       cover,
@@ -103,6 +116,9 @@ const PublishBookModal = ({
         uid: user.uid,
         title,
         plot,
+        genders:genders.map(gender => gender.value),
+        year,
+
       },
       cover,
       pdf,
@@ -140,6 +156,8 @@ const PublishBookModal = ({
     }
   };
 
+
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"2xl"}>
       <ModalOverlay />
@@ -161,6 +179,25 @@ const PublishBookModal = ({
             h={"200px"}
             resize={"none"}
           />
+
+          <Select
+            placeholder="Géneros"
+            isMulti
+            options={gendersOptions}
+            onChange={setGenders}
+            value={genders}
+          />
+          <Box>
+            <Text> Año:</Text>
+            <NumberInput defaultValue={2024} max={2024} onChange={setYear}>
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </Box>
+
           <Box>
             <Text>
               Sube el archivo PDF de tu libro

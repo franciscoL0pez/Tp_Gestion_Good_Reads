@@ -16,6 +16,7 @@ import { auth } from "@/services/firebase";
 import { EditIcon, useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
 
+
 import { Star1 } from "iconsax-react";
 import ReviewsModal from "@/components/books/ReviewsModal";
 import { useState } from "react";
@@ -23,6 +24,7 @@ import { useState } from "react";
 const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRemoveFromReadingList }) => {
   const [user] = useAuthState(auth);
   const [isBookAdded, setIsBookAdded] = useState(false);
+
   const isBookOwner = user?.uid === book?.author?.uid;
 
   const {
@@ -98,6 +100,7 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
           <Text
             fontSize={"20px"}
             color={"gray.500"}
+
             display={"flex"}
             fontWeight={"normal"}
             fontStyle={"italic"}
@@ -136,10 +139,12 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
           <Button
             colorScheme="green"
             mr={3}
+
             onClick={() => window.open(book?.pdf, "_blank")}
           >
             Descargar
           </Button>
+
           {isBookAdded ? (
             <Button
               onClick={handleRemoveFromReadingList} //Lo quito de la lista
@@ -155,6 +160,8 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
               Añadir a lista de lecturas
             </Button>
           )}
+
+
         </ModalFooter>
       </ModalContent>
       <PublishBookModal
@@ -167,6 +174,9 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
         book={book}
         isOpen={isReviewsModalOpen}
         onClose={closeReviewsModal}
+      
+        selectedBook={book}
+
         onEdit={onEdit}
       />
     </Modal>

@@ -77,6 +77,7 @@ const Books = () => {
     book.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  // --------------------- Estas funciones creo que no deberian estar en Books, pero si no me tirar error ---------------------
   // Función para añadir un libro a la lista de lectura
   const handleAddToReadingList = (book) => {
     console.log(`${book.title} añadido a la lista de lectura`);
