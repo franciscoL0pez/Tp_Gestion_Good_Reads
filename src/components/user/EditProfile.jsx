@@ -6,6 +6,7 @@ import { auth, db, storage } from "@/services/firebase";
 import { updateUser } from "@/services/users";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, getDoc } from "firebase/firestore";
+import { useUserData } from "@/hooks/useUserData";
 import {
   Button,
   FormControl,
@@ -25,6 +26,7 @@ const EditProfile = () => {
   const user = auth.currentUser;
   const router = useRouter();
   const toast = useToast();
+  const { userData } = useUserData();
 
   // State for form fields
   const [name, setName] = useState(user?.displayName || "");
@@ -34,7 +36,16 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(user.photoURL || "");
-  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState(userData?.genres || []);
+
+  // FIJATE QUE ESTO YA ESTABA MAS ABAJO
+  useEffect(() => {
+    if (userData) {
+      setSelectedGenres(userData.genres || []);
+    }
+  }, [userData]);
+
+  console.log(selectedGenres);
 
   const handleImageChange = (file) => {
     if (file) {
@@ -50,19 +61,6 @@ const EditProfile = () => {
       setName(splitName[0]);
       setLastName(splitName[1] || "");
     }
-
-    const fetchUserGenres = async () => {
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          console.log("userData:", userData);
-          setSelectedGenres(userData.genres || []);
-        }
-      }
-    };
-
-    fetchUserGenres();
   }, [user]);
 
   const handleSubmit = async (e) => {
@@ -130,6 +128,7 @@ const EditProfile = () => {
       borderWidth="1px"
       background={"white"}
       borderRadius={"md"}
+      overflowY={"auto"}
     >
       <Heading as="h2" size="lg" mb={6}>
         Editar Perfil
@@ -194,7 +193,7 @@ const EditProfile = () => {
           options={genres}
           placeholder="Selecciona tus géneros favoritos"
           value={selectedGenres} // Set the value to selectedGenres
-          onChange={(selected) => setSelectedGenres(selected)} // Ensure selected values are mapped correctly
+          onChange={setSelectedGenres} // Ensure selected values are mapped correctly
         />
 
         <Flex

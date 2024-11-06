@@ -18,7 +18,7 @@ const customStyles = {
   }),
 };
 
-const MultiSelect = ({ options, label, placeholder, onChange }) => {
+const MultiSelect = ({ options, label, placeholder, onChange, value }) => {
   const handleChange = (selectedOptions) => {
     onChange(selectedOptions || []);
   };
@@ -31,6 +31,7 @@ const MultiSelect = ({ options, label, placeholder, onChange }) => {
         options={options}
         styles={customStyles}
         placeholder={placeholder}
+        value={value}
         onChange={handleChange}
       />
     </FormControl>
