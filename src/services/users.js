@@ -1,5 +1,13 @@
 import { db } from "@/services/firebase";
-import { collection, addDoc, getDocs, where, query } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  where,
+  query,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 const createUser = async (data) => {
   try {
@@ -26,4 +34,16 @@ const getUser = async (uid) => {
   }
 };
 
-export { createUser, getUser };
+const updateUser = async (uid, data) => {
+  try {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, data);
+    console.log("data:", data);
+    return true;
+  } catch (error) {
+    console.error("Error updating document: ", error);
+    return null;
+  }
+};
+
+export { createUser, getUser, updateUser };

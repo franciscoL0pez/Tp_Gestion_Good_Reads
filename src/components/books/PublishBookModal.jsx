@@ -79,7 +79,7 @@ const PublishBookModal = ({
         genders: genders.map(gender => gender.value),
       },
       pdf,
-      cover,
+      cover
     );
 
     if (createdBook) {
@@ -130,7 +130,7 @@ const PublishBookModal = ({
         year,
       },
       cover,
-      pdf,
+      pdf
     );
 
     if (updatedBook) {
