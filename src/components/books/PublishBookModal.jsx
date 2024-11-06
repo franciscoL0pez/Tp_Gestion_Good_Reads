@@ -19,12 +19,12 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 
+  
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createBook, updateBook } from "@/services/books";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
-
 import Select from 'react-select';
 import { gendersOptions } from "@/data/genders";
 
@@ -45,6 +45,16 @@ const PublishBookModal = ({
   const [loading, setLoading] = useState(false);
 
   const toast = useToast();
+
+  useEffect(() => {
+    if (selectedBook) {
+      setTitle(selectedBook?.title || "");
+      setPlot(selectedBook?.plot || "");
+      setGenders(selectedBook?.genders?.map(gender => ({label: gender, value: gender})) || [])
+      setYear(selectedBook?.year || "");
+    }
+  }, [selectedBook])
+
 
   const handlePublish = async () => {
     if (!title || !plot || !pdf || !cover) {
@@ -118,7 +128,6 @@ const PublishBookModal = ({
         plot,
         genders:genders.map(gender => gender.value),
         year,
-
       },
       cover,
       pdf,
@@ -155,8 +164,6 @@ const PublishBookModal = ({
       await handleEdit();
     }
   };
-
-
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"2xl"}>
@@ -197,7 +204,6 @@ const PublishBookModal = ({
               </NumberInputStepper>
             </NumberInput>
           </Box>
-
           <Box>
             <Text>
               Sube el archivo PDF de tu libro

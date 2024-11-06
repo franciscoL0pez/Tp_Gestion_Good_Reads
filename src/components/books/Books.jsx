@@ -16,13 +16,15 @@ import ViewBookModal from "@/components/books/ViewBookModal";
 import { useState } from "react";
 
 const BookCard = ({ book, onEdit, onAddToReadingList , onRemoveFromReadingList}) => {
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Card
       onClick={onOpen}
       w={"250px"}
-      h={"350px"}
+      h={"370px"}
+
       p={"10px"}
       transition={"all 0.3s ease"}
       _hover={{
@@ -34,6 +36,12 @@ const BookCard = ({ book, onEdit, onAddToReadingList , onRemoveFromReadingList})
         <Text fontSize={"16px"} noOfLines={1}>
           {book.title}
         </Text>
+
+
+        <Text fontSize={"12px"} noOfLines={1} fontWeight="bold">
+          {book.genders?.[0]}
+        </Text>
+
         <img
           src={book.cover}
           alt={book.title}
@@ -53,6 +61,7 @@ const BookCard = ({ book, onEdit, onAddToReadingList , onRemoveFromReadingList})
         onEdit={onEdit}
         onAddToReadingList={onAddToReadingList} // Pasamos la función aquí
         onRemoveFromReadingList={onRemoveFromReadingList}
+
       />
     </Card>
   );
@@ -64,6 +73,7 @@ const Books = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const loading = userLoading || booksLoading;
+
   const isAuthor = userData?.isAuthor;
 
   const {
@@ -108,6 +118,7 @@ const Books = () => {
           </Button>
         )}
       </Flex>
+
       <Flex mt={"20px"} gap={"20px"} align={"center"}>
         {/* Caja de búsqueda */}
         <Input
@@ -117,6 +128,7 @@ const Books = () => {
           width={"300px"}
         />
       </Flex>
+
       <PublishBookModal
         isOpen={isPublishBookModalOpen}
         onClose={closePublishBookModal}
@@ -131,10 +143,13 @@ const Books = () => {
             onAddToReadingList={handleAddToReadingList} // Pasamos la función aquí
             onRemoveFromReadingList={handleRemoveFromReadingList}
           />
+
         ))}
       </Flex>
     </Skeleton>
   );
 };
+
+
 
 export default Books;
