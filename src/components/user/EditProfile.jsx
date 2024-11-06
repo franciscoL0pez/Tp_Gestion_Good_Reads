@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile, updateEmail, updatePassword } from "firebase/auth";
 import { auth, db, storage } from "@/services/firebase";
+import { updateUser } from "@/services/users";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { doc, getDoc } from "firebase/firestore";
 import {
   Button,
   FormControl,
@@ -15,7 +17,9 @@ import {
   Flex,
   Image,
 } from "@chakra-ui/react";
+import MultiSelect from "../ui/MultiSelect";
 import ImageUpload from "../ui/ImageInput";
+import genres from "../../../data/generos.json";
 
 const EditProfile = () => {
   const user = auth.currentUser;
@@ -30,6 +34,7 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(user.photoURL || "");
+  const [selectedGenres, setSelectedGenres] = useState([]);
 
   const handleImageChange = (file) => {
     if (file) {
@@ -45,6 +50,19 @@ const EditProfile = () => {
       setName(splitName[0]);
       setLastName(splitName[1] || "");
     }
+
+    const fetchUserGenres = async () => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          console.log("userData:", userData);
+          setSelectedGenres(userData.genres || []);
+        }
+      }
+    };
+
+    fetchUserGenres();
   }, [user]);
 
   const handleSubmit = async (e) => {
@@ -68,6 +86,14 @@ const EditProfile = () => {
             displayName: `${name} ${lastName}`,
           });
         }
+
+        // update user in db
+        await updateUser(user.uid, {
+          name,
+          lastName,
+          email,
+          genres: selectedGenres,
+        });
 
         toast({
           title: "Perfil actualizado",
@@ -162,7 +188,17 @@ const EditProfile = () => {
             placeholder="Nueva contraseña (dejar en blanco para no cambiar)"
           />
         </FormControl>
+
+        <MultiSelect
+          label="Géneros favoritos"
+          options={genres}
+          placeholder="Selecciona tus géneros favoritos"
+          value={selectedGenres} // Set the value to selectedGenres
+          onChange={(selected) => setSelectedGenres(selected)} // Ensure selected values are mapped correctly
+        />
+
         <Flex
+          mt={6}
           direction={["column", "row"]}
           align={["start", "center"]}
           justify="space-between"

@@ -1,13 +1,28 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Flex, Heading, Text, Image } from "@chakra-ui/react";
 import { getAuth } from "firebase/auth";
 import { app } from "@/services/firebase";
+import { getUser } from "@/services/users";
 
 const UserProfile = () => {
   const auth = getAuth(app);
   const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const data = await getUser(user.uid);
+      console.log("data:", data);
+      setUserData(data);
+    };
+    fetchUserData();
+  }, [user.uid]);
+
+  if (!userData) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <Flex
@@ -61,6 +76,18 @@ const UserProfile = () => {
 
         <Text>
           <strong>Email:</strong> {user.email}
+        </Text>
+        <Text mt={"10px"}>
+          <strong>Edad:</strong> 24
+        </Text>
+        <Text mt={"10px"}>
+          <strong>Género:</strong> Hombre
+        </Text>
+        <Text mt={"10px"}>
+          <strong>Géneros Favoritos:</strong>{" "}
+          {userData.genres
+            ? userData.genres.map((genre) => genre.label).join(", ")
+            : "No genres available"}
         </Text>
       </Box>
     </Flex>

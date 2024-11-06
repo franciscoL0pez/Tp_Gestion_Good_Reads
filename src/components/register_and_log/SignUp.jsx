@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import {
   Button,
   Checkbox,
@@ -14,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { createUser } from "@/services/users";
+import { auth, db, storage } from "@/services/firebase";
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -62,7 +64,7 @@ const SignUp = () => {
       const { user } = await createUserWithEmailAndPassword(
         auth,
         email,
-        password,
+        password
       );
 
       await updateProfile(user, {
@@ -74,6 +76,17 @@ const SignUp = () => {
         isAuthor,
         name,
         lastName,
+      });
+
+      // save user data in db
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name,
+        lastName,
+        // age,
+        // gender,
+        email,
+        isAuthor,
       });
 
       console.log("User created:", user);

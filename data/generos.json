@@ -1,0 +1,12 @@
+[
+  { "value": "fiction", "label": "Fiction" },
+  { "value": "non-fiction", "label": "Non-Fiction" },
+  { "value": "fantasy", "label": "Fantasy" },
+  { "value": "mystery", "label": "Mystery" },
+  { "value": "biography", "label": "Biography" },
+  { "value": "science-fiction", "label": "Science Fiction" },
+  { "value": "romance", "label": "Romance" },
+  { "value": "history", "label": "History" },
+  { "value": "horror", "label": "Horror" },
+  { "value": "self-help", "label": "Self-Help" }
+]
