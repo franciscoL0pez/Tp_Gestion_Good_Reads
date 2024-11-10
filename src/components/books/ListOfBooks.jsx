@@ -132,7 +132,7 @@ const BooksList = () => {
         >
           <Box mb="30px">
             <Heading fontSize="22px" mb="15px" color="teal.600">
-            Lecturas completadas
+              Lecturas completadas
             </Heading>
             <Divider mb="15px" />
             <Box maxH="300px" overflowY="auto">
@@ -151,7 +151,7 @@ const BooksList = () => {
           </Box>
           <Box>
             <Heading fontSize="22px" mb="15px" color="teal.600">
-            Lecturas en curso
+              Lecturas en curso
             </Heading>
             <Divider mb="15px" />
             <Box maxH="300px" overflowY="auto">

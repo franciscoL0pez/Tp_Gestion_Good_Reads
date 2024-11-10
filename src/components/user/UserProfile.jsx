@@ -4,25 +4,19 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Flex, Heading, Text, Image } from "@chakra-ui/react";
 import { getAuth } from "firebase/auth";
 import { app } from "@/services/firebase";
+import { useUserData } from "@/hooks/useUserData";
 import { getUser } from "@/services/users";
 
 const UserProfile = () => {
   const auth = getAuth(app);
   const user = auth.currentUser;
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const data = await getUser(user.uid);
-      console.log("data:", data);
-      setUserData(data);
-    };
-    fetchUserData();
-  }, [user.uid]);
+  const {userData} = useUserData();
 
   if (!userData) {
     return <Text>Loading...</Text>;
   }
+
+  console.log(userData);
 
   return (
     <Flex
