@@ -2,6 +2,7 @@ import { db } from "@/services/firebase";
 import {
   addDoc,
   collection,
+  deleteDoc, // Esto no se bien que es xd, pero se supone que sirve para eliminar esto
   doc,
   getDocs,
   getDoc,
@@ -90,4 +91,17 @@ const getReviews = async (bookId) => {
   }
 };
 
-export { createReview, updateReview, getReviews };
+
+//Creo un delete para eliminar la reseña
+const deleteReview = async (reviewId) => {
+  try {
+    const reviewRef = doc(db, "reviews", reviewId);
+    await deleteDoc(reviewRef);
+    return true; 
+  } catch (e) {
+    console.error("Error deleting document:", e);
+    return false; 
+  }
+};
+
+export { createReview, updateReview, getReviews, deleteReview };

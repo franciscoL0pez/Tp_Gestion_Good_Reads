@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,16 +13,20 @@ import {
   ModalOverlay,
   Text,
   Textarea,
+  useToast, // Importamos useToast de Chakra UI
 } from "@chakra-ui/react";
 import { Star1 } from "iconsax-react";
+import { CloseIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
-import { createReview, updateReview } from "@/services/reviews";
+import { createReview, updateReview, deleteReview } from "@/services/reviews";
 
-const ReviewItem = ({ review }) => {
+const ReviewItem = ({ review, onDelete }) => {
+  const [user] = useAuthState(auth);
+
   return (
-    <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"}>
+    <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"} position="relative">
       <Avatar
         name={review?.user?.name + " " + review?.user?.lastName}
         src={review?.user?.photoURL}
@@ -30,6 +35,9 @@ const ReviewItem = ({ review }) => {
         <Text fontSize={"16px"} fontWeight={"bold"}>
           {review?.user?.name + " " + review?.user?.lastName}
         </Text>
+        <Text fontSize={"14px"} color={"gray.500"}>
+          {review?.user?.isAuthor? "Escritor" : "Lector"}
+        </Text>
         <Flex>
           {[1, 2, 3, 4, 5].map((i) => (
             <Star1
@@ -37,11 +45,26 @@ const ReviewItem = ({ review }) => {
               variant={"Bold"}
               size={"16"}
               opacity={i <= review?.rating ? 1 : 0.3}
+              color={"gold"}
             />
           ))}
         </Flex>
         <Text fontSize={"14px"}>{review?.content}</Text>
       </Flex>
+
+      {/* Esta cruz la muestro solo si es el usuario que escribio la reseña */}
+      {user?.uid === review?.user?.uid && (
+        <IconButton
+          icon={<CloseIcon />}
+          size="sm"
+          position="absolute"
+          top="5px"
+          right="5px"
+          aria-label="Eliminar reseña"
+          colorScheme="red" // Cambiamos el color a rojo
+          onClick={() => onDelete(review.id)} // Llamo a la fun para eliminar la res 
+        />
+      )}
     </Flex>
   );
 };
@@ -62,22 +85,15 @@ const ReviewEditor = ({ book, review, onEdit }) => {
 
     if (!review) {
       const newReview = await createReview(book.id, user.uid, rating, content);
-
       onEdit({
         ...book,
         reviews: [...book.reviews, newReview],
       });
     } else {
       const updatedReview = await updateReview(review.id, rating, content);
-
       onEdit({
         ...book,
-        reviews: book.reviews.map((r) => {
-          if (r.id === updatedReview.id) {
-            return updatedReview;
-          }
-          return r;
-        }),
+        reviews: book.reviews.map((r) => (r.id === updatedReview.id ? updatedReview : r)),
       });
     }
 
@@ -93,13 +109,9 @@ const ReviewEditor = ({ book, review, onEdit }) => {
             variant={i <= rating ? "Bold" : "Linear"}
             size={"50"}
             opacity={i <= rating ? 1 : 0.3}
+            color={"gold"}
             onClick={() => setRating(i)}
-            style={{
-              cursor: "pointer",
-              ":hover": {
-                opacity: 0.8,
-              },
-            }}
+            style={{ cursor: "pointer" }}
           />
         ))}
       </Flex>
@@ -123,16 +135,30 @@ const ReviewEditor = ({ book, review, onEdit }) => {
 const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
   const [user] = useAuthState(auth);
   const reviews = book.reviews || [];
+  const toast = useToast(); // Esto lo uso para mostrar las reseñas
 
   const isBookOwner = user?.uid === book?.author?.uid;
 
+  // Función para eliminar la reseña
+  const handleDelete = async (reviewId) => {
+    const updatedReviews = reviews.filter((review) => review.id !== reviewId);
+    await deleteReview(reviewId); // Fun para eliminar de firebase
+    onEdit({
+      ...book,
+      reviews: updatedReviews,
+    });
+    // Mostramos una notificación cuando se elimina la reseña 
+    toast({
+      title: "Reseña eliminada.",
+      description: "Se eliminó la reseña correctamente.",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size={"5xl"}
-      scrollBehavior={"inside"}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size={"5xl"} scrollBehavior={"inside"}>
       <ModalOverlay />
       <ModalContent margin={"auto"} pb={"20px"}>
         <ModalCloseButton />
@@ -158,17 +184,12 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
             minH={"400px"}
           >
             {reviews.map((review) => (
-              <ReviewItem key={review.id} review={review} />
+              <ReviewItem key={review.id} review={review} onDelete={handleDelete} />
             ))}
             {!reviews.length && (
-              <Box
-                display={"flex"}
-                alignItems={"center"}
-                justifyContent={"center"}
-                h={"100%"}
-              >
+              <Box display={"flex"} alignItems={"center"} justifyContent={"center"} h={"100%"}>
                 <Text fontSize={"20px"} textAlign={"center"} mb={"60px"}>
-                  Todavia no hay reseñas para este libro.
+                  Todavía no hay reseñas para este libro.
                 </Text>
               </Box>
             )}
@@ -181,3 +202,7 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
 };
 
 export default ReviewsModal;
+
+
+
+
