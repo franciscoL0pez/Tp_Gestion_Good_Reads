@@ -26,7 +26,10 @@ const getUser = async (uid) => {
 
     const querySnapshot = await getDocs(q);
 
-    const users = querySnapshot.docs.map((doc) => doc.data());
+    const users = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
     return users[0];
   } catch (e) {
     console.error("Error getting document:", e);
@@ -36,7 +39,11 @@ const getUser = async (uid) => {
 
 const updateUser = async (uid, data) => {
   try {
-    const userRef = doc(db, "users", uid);
+
+    const dbUser = await getUser(uid);
+
+    const userRef = doc(db, "users", dbUser.id);
+
     await updateDoc(userRef, data);
     console.log("data:", data);
     return true;

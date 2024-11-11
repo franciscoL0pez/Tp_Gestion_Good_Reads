@@ -9,20 +9,20 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useUserData } from "@/hooks/useUserData";
-import { useDisclosure } from "@chakra-ui/icons";
+import { useDisclosure } from "@chakra-ui/react";
 import PublishBookModal from "@/components/books/PublishBookModal";
 import { useBooks } from "@/hooks/useBooks";
 import ViewBookModal from "@/components/books/ViewBookModal";
 import { useState } from "react";
 
-const BookCard = ({ book, onEdit }) => {
+const BookCard = ({ book, onEdit, onAddToReadingList, onRemoveFromReadingList }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Card
       onClick={onOpen}
       w={"250px"}
-      h={"350px"}
+      h={"370px"}
       p={"10px"}
       transition={"all 0.3s ease"}
       _hover={{
@@ -33,6 +33,9 @@ const BookCard = ({ book, onEdit }) => {
       <Flex direction={"column"} gap={"5px"}>
         <Text fontSize={"16px"} noOfLines={1}>
           {book.title}
+        </Text>
+        <Text fontSize={"12px"} noOfLines={1} fontWeight="bold">
+          {book.genders?.[0]}
         </Text>
         <img
           src={book.cover}
@@ -51,6 +54,8 @@ const BookCard = ({ book, onEdit }) => {
         onClose={onClose}
         book={book}
         onEdit={onEdit}
+        onAddToReadingList={onAddToReadingList}
+        onRemoveFromReadingList={onRemoveFromReadingList}
       />
     </Card>
   );
@@ -59,7 +64,8 @@ const BookCard = ({ book, onEdit }) => {
 const Books = () => {
   const { userData, loading: userLoading } = useUserData();
   const { books, loading: booksLoading, addBook, editBook } = useBooks();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTitle, setSearchTitle] = useState("");
+  const [searchAuthor, setSearchAuthor] = useState("");
 
   const loading = userLoading || booksLoading;
 
@@ -71,10 +77,22 @@ const Books = () => {
     onClose: closePublishBookModal,
   } = useDisclosure();
 
-  // Filtrar libros basados en el término de búsqueda
-  const filteredBooks = books?.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()),
+  // Filtrar libros basados en el título y el autor
+  const filteredBooks = books?.filter(
+    (book) =>
+      book.title.toLowerCase().includes(searchTitle.toLowerCase()) 
+    
   );
+
+  // Función para añadir un libro a la lista de lectura
+  const handleAddToReadingList = (book) => {
+    console.log(`${book.title} añadido a la lista de lectura`);
+  };
+
+  // Función para quitar un libro de la lista de lectura
+  const handleRemoveFromReadingList = (book) => {
+    console.log(`${book.title} eliminado de la lista de lectura`);
+  };
 
   return (
     <Skeleton
@@ -94,23 +112,34 @@ const Books = () => {
           </Button>
         )}
       </Flex>
+
       <Flex mt={"20px"} gap={"20px"} align={"center"}>
-        {/* Caja de búsqueda */}
+        {/* Caja de búsqueda para el título */}
         <Input
           placeholder="Buscar libro por título..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchTitle}
+          onChange={(e) => setSearchTitle(e.target.value)}
           width={"300px"}
         />
+        {/* Nueva caja de búsqueda para el autor */}
+   
       </Flex>
+
       <PublishBookModal
         isOpen={isPublishBookModalOpen}
         onClose={closePublishBookModal}
         onCreate={addBook}
       />
+
       <Flex mt={"20px"} gap={"20px"} wrap={"wrap"} overflowY={"auto"} h={"80%"}>
         {filteredBooks?.map((book) => (
-          <BookCard key={book.id} book={book} onEdit={editBook} />
+          <BookCard
+            key={book.id}
+            book={book}
+            onEdit={editBook}
+            onAddToReadingList={handleAddToReadingList}
+            onRemoveFromReadingList={handleRemoveFromReadingList}
+          />
         ))}
       </Flex>
     </Skeleton>

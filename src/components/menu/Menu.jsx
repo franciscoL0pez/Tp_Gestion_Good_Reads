@@ -45,7 +45,7 @@ const Menu = () => {
     >
       <Image src="/images/logo.jpg" width={180} height={180} />
       <Flex direction={"column"} gap={"15px"} h={"50%"}>
-        <MenuLink href="/home" title="Home">
+        <MenuLink href="/home/home2" title="Home">
           <Home2 size="28" color="black" />
         </MenuLink>
         <MenuLink href="/home/books" title="Libros">
