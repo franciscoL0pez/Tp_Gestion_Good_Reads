@@ -135,19 +135,19 @@ const ReviewEditor = ({ book, review, onEdit }) => {
 const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
   const [user] = useAuthState(auth);
   const reviews = book.reviews || [];
-  const toast = useToast(); // Esto lo uso para mostrar las reseñas
+  const toast = useToast(); 
 
   const isBookOwner = user?.uid === book?.author?.uid;
 
-  // Función para eliminar la reseña
+  
   const handleDelete = async (reviewId) => {
     const updatedReviews = reviews.filter((review) => review.id !== reviewId);
-    await deleteReview(reviewId); // Fun para eliminar de firebase
+    await deleteReview(reviewId); 
     onEdit({
       ...book,
       reviews: updatedReviews,
     });
-    // Mostramos una notificación cuando se elimina la reseña 
+ 
     toast({
       title: "Reseña eliminada.",
       description: "Se eliminó la reseña correctamente.",

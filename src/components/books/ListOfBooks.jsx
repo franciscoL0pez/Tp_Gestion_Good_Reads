@@ -10,11 +10,10 @@ import {
   Box,
   VStack,
   Divider,
-  Image,
-  HStack,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import ViewBookModal from "@/components/books/ViewBookModal";
+import { useState, useEffect } from "react";
+import { getBookLists, updateBookList } from "@/services/bookList"; // Servicio para interactuar con Firebase
+import { useUserData } from "@/hooks/useUserData";  // Hook para obtener el usuario actual
 
 const BookItem = ({ book, onMove, inProgress }) => {
   return (
@@ -29,30 +28,15 @@ const BookItem = ({ book, onMove, inProgress }) => {
       borderWidth="1px"
       borderRadius="10px"
       boxShadow="md"
-      _hover={{ boxShadow: "lg", transform: "translateY(-5px)", bg: "gray.50" }}
-      transition="all 0.3s ease"
     >
-      <HStack spacing={4} alignItems="center">
-        <Box boxSize="60px" display="flex" justifyContent="center" alignItems="center">
-          <Image
-            src={`/fotosPrueba/${book.image}`}
-            alt={book.title}
-            boxSize="100%"
-            objectFit="cover"
-            borderRadius="5px"
-          />
-        </Box>
-        <Text fontSize="16px" fontWeight="bold" color="gray.700" noOfLines={1}>
-          {book.title}
-        </Text>
-      </HStack>
+      <Text fontSize="16px" fontWeight="bold" color="gray.700">
+        {book.title}
+      </Text>
       <Button
         colorScheme={inProgress ? "blue" : "green"}
         variant="solid"
         size="sm"
         onClick={() => onMove(book)}
-        _hover={{ transform: "scale(1.05)" }}
-        transition="all 0.2s ease"
       >
         {inProgress ? "Completado" : "Lectura en curso"}
       </Button>
@@ -60,51 +44,37 @@ const BookItem = ({ book, onMove, inProgress }) => {
   );
 };
 
-const BooksList = () => {
-  const [booksInProgress, setBooksInProgress] = useState([
-    { id: 1, title: "El Alquimista", image: "ElAlquimista.jpg" },
-    { id: 2, title: "1984", image: "1984.png" },
-  ]);
-  const [completedBooks, setCompletedBooks] = useState([
-    { id: 3, title: "Moby Dick", image: "MobyDick.webp" },
-  ]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [isViewBookModalOpen, setViewBookModalOpen] = useState(false);
+const ListOfBooks = () => {
+  const [booksInProgress, setBooksInProgress] = useState([]);
+  const [completedBooks, setCompletedBooks] = useState([]);
+  const { user } = useUserData(); // Uso el us de useUserData para obtener el usuario actual
 
-  const markAsCompleted = (book) => {
+  useEffect(() => {
+    if (user) {
+      loadBookLists(user.uid);
+    }
+  }, [user]);
+
+  const loadBookLists = async (uid) => {
+    try {
+      const { booksInProgress, completedBooks } = await getBookLists(uid);
+      setBooksInProgress(booksInProgress);
+      setCompletedBooks(completedBooks);
+    } catch (error) {
+      console.error("Error loading book lists:", error);
+    }
+  };
+
+  const markAsCompleted = async (book) => {
     setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
     setCompletedBooks((prev) => [...prev, book]);
+    await updateBookList(user.uid, booksInProgress, completedBooks);
   };
 
-  const moveToInProgress = (book) => {
+  const moveToInProgress = async (book) => {
     setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
     setBooksInProgress((prev) => [...prev, book]);
-  };
-
-  const filteredInProgress = booksInProgress.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredCompleted = completedBooks.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  //Añado el libro
-  const addBookToReadingList = (book) => {
-    setBooksInProgress((prev) => [...prev, book]);
-    setViewBookModalOpen(false);
-  };
-
-  //Borro el libro de la lista
-  const removeBookFromReadingList = (book) => {
-    setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
-    setViewBookModalOpen(false); 
-  };
-
-  const openViewBookModal = (book) => {
-    setSelectedBook(book);
-    setViewBookModalOpen(true);
+    await updateBookList(user.uid, booksInProgress, completedBooks);
   };
 
   return (
@@ -132,13 +102,13 @@ const BooksList = () => {
         >
           <Box mb="30px">
             <Heading fontSize="22px" mb="15px" color="teal.600">
-              Lecturas completadas
+              Lecturas en curso
             </Heading>
             <Divider mb="15px" />
             <Box maxH="300px" overflowY="auto">
               <VStack spacing={4} align="stretch">
-                {filteredInProgress.length > 0 ? (
-                  filteredInProgress.map((book) => (
+                {booksInProgress.length > 0 ? (
+                  booksInProgress.map((book) => (
                     <BookItem key={book.id} book={book} onMove={markAsCompleted} inProgress />
                   ))
                 ) : (
@@ -151,13 +121,13 @@ const BooksList = () => {
           </Box>
           <Box>
             <Heading fontSize="22px" mb="15px" color="teal.600">
-              Lecturas en curso
+              Lecturas completadas
             </Heading>
             <Divider mb="15px" />
             <Box maxH="300px" overflowY="auto">
               <VStack spacing={4} align="stretch">
-                {filteredCompleted.length > 0 ? (
-                  filteredCompleted.map((book) => (
+                {completedBooks.length > 0 ? (
+                  completedBooks.map((book) => (
                     <BookItem key={book.id} book={book} onMove={moveToInProgress} />
                   ))
                 ) : (
@@ -170,19 +140,9 @@ const BooksList = () => {
           </Box>
         </Box>
       </Flex>
-
-      {selectedBook && (
-        <ViewBookModal
-          isOpen={isViewBookModalOpen}
-          onClose={() => setViewBookModalOpen(false)}
-          book={selectedBook}
-          onAddToReadingList={addBookToReadingList}
-          onRemoveFromReadingList={removeBookFromReadingList}
-        />
-      )}
     </Skeleton>
   );
 };
 
-export default BooksList;
+export default ListOfBooks;
 

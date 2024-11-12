@@ -11,21 +11,27 @@ import {
   Text,
   useToast,
   Flex,
-  Box
+  Box,
 } from "@chakra-ui/react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { EditIcon, useDisclosure } from "@chakra-ui/icons";
 import PublishBookModal from "@/components/books/PublishBookModal";
 
-
 import { Star1 } from "iconsax-react";
 import ReviewsModal from "@/components/books/ReviewsModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
 
-const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRemoveFromReadingList }) => {
+  addToInProgress,
+  removeFromInProgress,
+  removeFromCompleted,
+} from "@/services/bookList"; // Importamos los servicios
+
+const ViewBookModal = ({ isOpen, onClose, book, onEdit }) => {
   const [user] = useAuthState(auth);
   const [isBookAdded, setIsBookAdded] = useState(false);
+  const toast = useToast();
 
   const isBookOwner = user?.uid === book?.author?.uid;
 
@@ -35,12 +41,26 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
     onClose: closeEditBookModal,
   } = useDisclosure();
 
-  const toast = useToast();
+  const {
+    isOpen: isReviewsModalOpen,
+    onOpen: openReviewsModal,
+    onClose: closeReviewsModal,
+  } = useDisclosure();
 
-  const handleAddToReadingList = () => {
-    if (!isBookAdded) {
+
+  useEffect(() => {
+    if (user && book) {
+      const readingList = user?.readingList || [];
+      setIsBookAdded(readingList.some((b) => b.id === book.id));
+    }
+  }, [user, book]);
+
+  const handleAddToReadingList = async () => {
+    if (!isBookAdded && user) {
       setIsBookAdded(true);
-      onAddToReadingList(book); 
+  
+      await addToInProgress(user.uid, book);
+    
       toast({
         title: "Libro añadido",
         description: `${book?.title} ha sido añadido a tu lista de lecturas.`,
@@ -51,10 +71,13 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
     }
   };
 
-  const handleRemoveFromReadingList = () => {
-    if (isBookAdded) {
+  const handleRemoveFromReadingList = async () => {
+    if (isBookAdded && user) {
       setIsBookAdded(false);
-      onRemoveFromReadingList(book); 
+
+      await removeFromInProgress(user.uid, book);
+      //await removeFromCompleted(user.uid, book);
+
       toast({
         title: "Libro eliminado",
         description: `${book?.title} ha sido eliminado de tu lista de lecturas.`,
@@ -64,12 +87,6 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
       });
     }
   };
-
-  const {
-    isOpen: isReviewsModalOpen,
-    onOpen: openReviewsModal,
-    onClose: closeReviewsModal,
-  } = useDisclosure();
 
   const averageRating =
     book?.reviews.reduce((acc, review) => acc + review.rating, 0) /
@@ -102,7 +119,6 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
           <Text
             fontSize={"20px"}
             color={"gray.500"}
-
             display={"flex"}
             fontWeight={"normal"}
             fontStyle={"italic"}
@@ -119,8 +135,8 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
           </Text>
         </ModalHeader>
         <ModalBody display={"flex"} gap={"40px"} flexDirection={"column"}>
-        <Flex gap="40px">
-              <img
+          <Flex gap="40px">
+            <img
               src={book?.cover}
               alt={book?.title}
               style={{
@@ -135,10 +151,17 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
             </Text>
           </Flex>
           <Flex ml="2" gap="10px">
-              {book?.genders?.map(gender => {
-                return <Box py="4px" px="8px" bg="gray.200" borderRadius="8px">{gender}</Box>
-                })
-                }
+            {book?.genders?.map((gender) => (
+              <Box
+                key={gender}
+                py="4px"
+                px="8px"
+                bg="gray.200"
+                borderRadius="8px"
+              >
+                {gender}
+              </Box>
+            ))}
           </Flex>
         </ModalBody>
         <ModalFooter>
@@ -147,17 +170,11 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
           </Button>
 
           {isBookAdded ? (
-            <Button
-              onClick={handleRemoveFromReadingList} //Lo quito de la lista
-              colorScheme="red" 
-            >
+            <Button onClick={handleRemoveFromReadingList} colorScheme="red">
               Quitar de lista de lecturas
             </Button>
           ) : (
-            <Button
-              onClick={handleAddToReadingList}
-              colorScheme="gray"
-            >
+            <Button onClick={handleAddToReadingList} colorScheme="gray">
               Añadir a lista de lecturas
             </Button>
           )}
@@ -165,30 +182,25 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
           <Button
             colorScheme="green"
             ml={3}
-
             onClick={() => window.open(book?.pdf, "_blank")}
           >
             Descargar
           </Button>
-
-          
-
-
         </ModalFooter>
       </ModalContent>
+
       <PublishBookModal
         isOpen={isEditBookModalOpen}
         onClose={closeEditBookModal}
         selectedBook={book}
         onEdit={onEdit}
       />
+
       <ReviewsModal
         book={book}
         isOpen={isReviewsModalOpen}
         onClose={closeReviewsModal}
-      
         selectedBook={book}
-
         onEdit={onEdit}
       />
     </Modal>
@@ -196,5 +208,6 @@ const ViewBookModal = ({ isOpen, onClose, book, onEdit, onAddToReadingList, onRe
 };
 
 export default ViewBookModal;
+
 
 

@@ -54,8 +54,6 @@ const BookCard = ({ book, onEdit, onAddToReadingList, onRemoveFromReadingList })
         onClose={onClose}
         book={book}
         onEdit={onEdit}
-        onAddToReadingList={onAddToReadingList}
-        onRemoveFromReadingList={onRemoveFromReadingList}
       />
     </Card>
   );
@@ -65,7 +63,6 @@ const Books = () => {
   const { userData, loading: userLoading } = useUserData();
   const { books, loading: booksLoading, addBook, editBook } = useBooks();
   const [searchTitle, setSearchTitle] = useState("");
-  const [searchAuthor, setSearchAuthor] = useState("");
 
   const loading = userLoading || booksLoading;
 
@@ -137,8 +134,6 @@ const Books = () => {
             key={book.id}
             book={book}
             onEdit={editBook}
-            onAddToReadingList={handleAddToReadingList}
-            onRemoveFromReadingList={handleRemoveFromReadingList}
           />
         ))}
       </Flex>
