@@ -27,9 +27,15 @@ const SignUp = () => {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [isAuthor, setIsAuthor] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  
   const router = useRouter();
   const toast = useToast();
+
+  const followers = [];
+  const following = [];
+
+  const releases = 0;
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,6 +82,9 @@ const SignUp = () => {
         isAuthor,
         name,
         lastName,
+        followers,
+        following,
+        releases,
       });
 
       // save user data in db
@@ -87,6 +96,9 @@ const SignUp = () => {
         // gender,
         email,
         isAuthor,
+        followers,
+        following,
+        releases,
       });
 
       console.log("User created:", user);
