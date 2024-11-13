@@ -21,9 +21,62 @@ import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { createReview, updateReview, deleteReview } from "@/services/reviews";
+import { UserModal } from "@/services/users"
+import { updateDoc } from "firebase/firestore";
+
+
+const FollowButon = ({user, review}) =>{
+  const [isFollowing, setIsFollowing] = useState(false)
+
+  const handleFollow = async() => {
+    
+    try {
+  
+      const followedUser = doc(db, "users", review?.user?.uid);
+      const User = doc(db, "users", user?.uid);
+      if (isFollowing) {
+        
+        await updateDoc (followedUser, {followers: increment(-1),});
+        await updateDoc (User, {following: increment(-1),});
+      } else {
+        await updateDoc (followedUser, {followers: increment(1),});
+        await updateDoc (User, {following: increment(1),});
+      }
+
+      setIsFollowing(!isFollowing);
+
+    } catch (e) {
+      console.error("Error following user:", e);
+    }
+
+  }
+
+  return (
+    <>
+    {user?.uid !== review?.user?.uid &&(
+      <Button
+        width="70px"
+        height="30px"
+        fontSize="12px"
+        fontWeight="2px"
+        colorScheme={isFollowing ? "green" : "blue"}
+        borderRadius="10px"
+        color="white"
+        _hover={{ backgroundColor: isFollowing ? "green.600" : "blue.600" }}
+        onClick={handleFollow}
+        >
+        {isFollowing ? "siguiendo" : "seguir"}
+      </Button>
+    )}
+    </>
+  )
+
+}
+
 
 const ReviewItem = ({ review, onDelete }) => {
   const [user] = useAuthState(auth);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   return (
     <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"} position="relative">
@@ -32,11 +85,66 @@ const ReviewItem = ({ review, onDelete }) => {
         src={review?.user?.photoURL}
       />
       <Flex direction={"column"} ml={"10px"} gap={"4px"}>
-        <Text fontSize={"16px"} fontWeight={"bold"}>
+        <Text 
+          fontSize={"16px"} 
+          fontWeight={"bold"}
+          _hover={{ textDecoration: "underline", cursor: "pointer"}}
+          onClick={() => setIsUserModalOpen(true)}
+        >
+          <Modal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)}
+            size="2xl"
+          >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalCloseButton />
+            <ModalBody
+            >
+              <Flex direction="row" align="center" gap="20px">
+                <Avatar
+                  name={review?.user?.name + " " + review?.user?.lastName}
+                  src={review?.user?.photoURL}
+                  size = "xl"
+                />
+                <Flex direction="column" align="flex-start" gap="20px">
+                  <Flex direction="row" alignItems="flex-start" gap="20px">
+                    <Text fontSize={"16px"}>
+                      {review?.user?.name + " " + review?.user?.lastName}
+                    </Text>
+                    {user?.uid !== review?.user?.uid && (
+                      <FollowButon user={user} review={review} />
+                    )}
+                  </Flex>
+
+                  <Flex alignItems="flex-start" gap={"10px"}>
+                    <Text Text fontSize={"18px"}>
+                      Seguidores: {review?.user?.followers}
+                    </Text>
+                    <Text Text fontSize={"18px"}>
+                      Seguidos: {review?.user?.following}
+                    </Text>
+                  </Flex>
+
+                  <Flex alignItems="flex-start" gap={"10px"}>
+
+                    <Text Text fontSize={"18px"}>
+                      Reseñas: {review?.user?.releases}
+                    </Text>
+
+                    <Text fontSize={"18px"}>
+                    {review?.user?.isAuthor && "Publicaciones: "} 
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              <Text fontSize={"16px"} color={"gray.500"}>
+                {review?.user?.isAuthor? "Escritor" : "Lector"}
+              </Text>
+              
+            </ModalBody>
+          </ModalContent>
+        </Modal>
           {review?.user?.name + " " + review?.user?.lastName}
-        </Text>
-        <Text fontSize={"14px"} color={"gray.500"}>
-          {review?.user?.isAuthor? "Escritor" : "Lector"}
         </Text>
         <Flex>
           {[1, 2, 3, 4, 5].map((i) => (
@@ -49,8 +157,11 @@ const ReviewItem = ({ review, onDelete }) => {
             />
           ))}
         </Flex>
+
         <Text fontSize={"14px"}>{review?.content}</Text>
       </Flex>
+
+      
 
       {/* Esta cruz la muestro solo si es el usuario que escribio la reseña */}
       {user?.uid === review?.user?.uid && (
@@ -135,19 +246,19 @@ const ReviewEditor = ({ book, review, onEdit }) => {
 const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
   const [user] = useAuthState(auth);
   const reviews = book.reviews || [];
-  const toast = useToast(); // Esto lo uso para mostrar las reseñas
+  const toast = useToast(); 
 
   const isBookOwner = user?.uid === book?.author?.uid;
 
-  // Función para eliminar la reseña
+  
   const handleDelete = async (reviewId) => {
     const updatedReviews = reviews.filter((review) => review.id !== reviewId);
-    await deleteReview(reviewId); // Fun para eliminar de firebase
+    await deleteReview(reviewId); 
     onEdit({
       ...book,
       reviews: updatedReviews,
     });
-    // Mostramos una notificación cuando se elimina la reseña 
+ 
     toast({
       title: "Reseña eliminada.",
       description: "Se eliminó la reseña correctamente.",

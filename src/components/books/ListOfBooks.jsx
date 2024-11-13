@@ -10,16 +10,20 @@ import {
   Box,
   VStack,
   Divider,
-  Image,
-  HStack,
+  CircularProgress,
+  CircularProgressLabel,
+  useBreakpointValue,
+  ScaleFade,
+  SlideFade,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import ViewBookModal from "@/components/books/ViewBookModal";
+import { useState, useEffect } from "react";
+import { getBookLists, updateBookList } from "@/services/bookList"; // Servicio para interactuar con Firebase
+import { useUserData } from "@/hooks/useUserData";  // Hook para obtener el usuario actual
 
 const BookItem = ({ book, onMove, inProgress }) => {
   return (
     <Card
-      p="15px"
+      p="20px"
       w="100%"
       display="flex"
       justifyContent="space-between"
@@ -27,32 +31,25 @@ const BookItem = ({ book, onMove, inProgress }) => {
       mb="10px"
       bg="white"
       borderWidth="1px"
-      borderRadius="10px"
-      boxShadow="md"
-      _hover={{ boxShadow: "lg", transform: "translateY(-5px)", bg: "gray.50" }}
-      transition="all 0.3s ease"
+      borderRadius="15px"
+      boxShadow="lg"
+      transition="all 0.3s ease-in-out"
+      _hover={{
+        transform: "scale(1.05)",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+      }}
     >
-      <HStack spacing={4} alignItems="center">
-        <Box boxSize="60px" display="flex" justifyContent="center" alignItems="center">
-          <Image
-            src={`/fotosPrueba/${book.image}`}
-            alt={book.title}
-            boxSize="100%"
-            objectFit="cover"
-            borderRadius="5px"
-          />
-        </Box>
-        <Text fontSize="16px" fontWeight="bold" color="gray.700" noOfLines={1}>
-          {book.title}
-        </Text>
-      </HStack>
+      <Text fontSize="16px" fontWeight="bold" color="gray.800" letterSpacing="0.5px">
+        {book.title}
+      </Text>
       <Button
-        colorScheme={inProgress ? "blue" : "green"}
+        colorScheme={inProgress ? "green" : "blue"}
         variant="solid"
         size="sm"
         onClick={() => onMove(book)}
-        _hover={{ transform: "scale(1.05)" }}
-        transition="all 0.2s ease"
+        _hover={{
+          bg: inProgress ? "green.600" : "blue.600",
+        }}
       >
         {inProgress ? "Completado" : "Lectura en curso"}
       </Button>
@@ -60,85 +57,100 @@ const BookItem = ({ book, onMove, inProgress }) => {
   );
 };
 
-const BooksList = () => {
-  const [booksInProgress, setBooksInProgress] = useState([
-    { id: 1, title: "El Alquimista", image: "ElAlquimista.jpg" },
-    { id: 2, title: "1984", image: "1984.png" },
-  ]);
-  const [completedBooks, setCompletedBooks] = useState([
-    { id: 3, title: "Moby Dick", image: "MobyDick.webp" },
-  ]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [isViewBookModalOpen, setViewBookModalOpen] = useState(false);
+const ListOfBooks = () => {
+  const [booksInProgress, setBooksInProgress] = useState([]);
+  const [completedBooks, setCompletedBooks] = useState([]);
+  const { user } = useUserData(); // Uso el hook de useUserData para obtener el usuario actual
 
-  const markAsCompleted = (book) => {
+  useEffect(() => {
+    if (user) {
+      loadBookLists(user.uid);
+    }
+  }, [user]);
+
+  const loadBookLists = async (uid) => {
+    try {
+      const { booksInProgress, completedBooks } = await getBookLists(uid);
+      setBooksInProgress(booksInProgress);
+      setCompletedBooks(completedBooks);
+    } catch (error) {
+      console.error("Error loading book lists:", error);
+    }
+  };
+
+  const markAsCompleted = async (book) => {
     setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
     setCompletedBooks((prev) => [...prev, book]);
+    await updateBookList(user.uid, booksInProgress, completedBooks);
   };
 
-  const moveToInProgress = (book) => {
+  const moveToInProgress = async (book) => {
     setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
     setBooksInProgress((prev) => [...prev, book]);
+    await updateBookList(user.uid, booksInProgress, completedBooks);
   };
 
-  const filteredInProgress = booksInProgress.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredCompleted = completedBooks.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  //Añado el libro
-  const addBookToReadingList = (book) => {
-    setBooksInProgress((prev) => [...prev, book]);
-    setViewBookModalOpen(false);
-  };
-
-  //Borro el libro de la lista
-  const removeBookFromReadingList = (book) => {
-    setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
-    setViewBookModalOpen(false); 
-  };
-
-  const openViewBookModal = (book) => {
-    setSelectedBook(book);
-    setViewBookModalOpen(true);
-  };
+  // Calcular las estadísticas
+  const totalBooks = booksInProgress.length + completedBooks.length;
+  const completedPercentage = totalBooks === 0 ? 0 : (completedBooks.length / totalBooks) * 100;
 
   return (
     <Skeleton padding="5%" w="100%" h="100%" borderRadius="20px" isLoaded={true}>
-      <Flex justify="space-between" align="center" mb="30px">
+      <Flex
+        justify="space-between"
+        align="center"
+        mb="30px"
+        direction={useBreakpointValue({ base: "column", md: "row" })}
+        p={4}
+      >
         <Heading
-          fontWeight={600}
-          fontSize="26px"
-          bgGradient="linear(to-r, teal.500, green.500)"
+          fontWeight={700}
+          fontSize={["24px", "30px", "36px"]}
+          bgGradient="linear(to-r, teal.400, teal.600)"
           bgClip="text"
+          mb={[4, 0]}
+          transition="all 0.3s ease-in-out"
+          _hover={{
+            bgGradient: "linear(to-r, purple.400, pink.600)",
+            bgClip: "text",
+            transform: "scale(1.05)",
+          }}
         >
           Mis Libros
         </Heading>
+        <SlideFade in={true} offsetY="20px">
+          <Text fontSize="18px" color="gray.600" maxW="500px" textAlign="center">
+            Gestiona tus libros leídos y en progreso. ¡No pierdas el hilo de tu lectura!
+          </Text>
+        </SlideFade>
       </Flex>
 
-      <Flex justifyContent="flex-start" wrap="wrap" maxW="35%">
+      <Flex justifyContent="space-between" wrap="wrap">
+        {/* List of Books */}
         <Box
           bg="white"
           p="20px"
-          borderRadius="15px"
-          boxShadow="xl"
-          maxW="90%"
+          borderRadius="20px"
+          boxShadow="lg"
+          maxW={["100%", "60%"]}
           flex="1"
           minW="250px"
+          mb={[6, 0]}
+          transition="all 0.3s ease-in-out"
+          _hover={{
+            transform: "scale(1.02)",
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+          }}
         >
           <Box mb="30px">
-            <Heading fontSize="22px" mb="15px" color="teal.600">
-              Lecturas completadas
+            <Heading fontSize="22px" mb="15px" color="teal.600" fontWeight="bold">
+              Lecturas en curso
             </Heading>
-            <Divider mb="15px" />
+            <Divider mb="15px" borderColor="teal.500" />
             <Box maxH="300px" overflowY="auto">
               <VStack spacing={4} align="stretch">
-                {filteredInProgress.length > 0 ? (
-                  filteredInProgress.map((book) => (
+                {booksInProgress.length > 0 ? (
+                  booksInProgress.map((book) => (
                     <BookItem key={book.id} book={book} onMove={markAsCompleted} inProgress />
                   ))
                 ) : (
@@ -149,15 +161,16 @@ const BooksList = () => {
               </VStack>
             </Box>
           </Box>
+
           <Box>
-            <Heading fontSize="22px" mb="15px" color="teal.600">
-              Lecturas en curso
+            <Heading fontSize="22px" mb="15px" color="teal.600" fontWeight="bold">
+              Lecturas completadas
             </Heading>
-            <Divider mb="15px" />
+            <Divider mb="15px" borderColor="teal.500" />
             <Box maxH="300px" overflowY="auto">
               <VStack spacing={4} align="stretch">
-                {filteredCompleted.length > 0 ? (
-                  filteredCompleted.map((book) => (
+                {completedBooks.length > 0 ? (
+                  completedBooks.map((book) => (
                     <BookItem key={book.id} book={book} onMove={moveToInProgress} />
                   ))
                 ) : (
@@ -169,20 +182,51 @@ const BooksList = () => {
             </Box>
           </Box>
         </Box>
-      </Flex>
 
-      {selectedBook && (
-        <ViewBookModal
-          isOpen={isViewBookModalOpen}
-          onClose={() => setViewBookModalOpen(false)}
-          book={selectedBook}
-          onAddToReadingList={addBookToReadingList}
-          onRemoveFromReadingList={removeBookFromReadingList}
-        />
-      )}
+        {/* Book Stats */}
+        <Box
+          bg="white"
+          p="20px"
+          borderRadius="20px"
+          boxShadow="lg"
+          maxW={["100%", "35%"]}
+          flex="1"
+          minW="250px"
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          mb={[6, 0]}
+          transition="all 0.3s ease-in-out"
+          _hover={{
+            transform: "scale(1.02)",
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Heading fontSize="22px" mb="15px" color="teal.600" fontWeight="bold">
+            Estadísticas de Lecturas
+          </Heading>
+          <Divider mb="15px" borderColor="teal.500" />
+          
+          {/* Circular Progress Bar */}
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <CircularProgress value={completedPercentage} size="120px" color="green.400" thickness="8px" transition="all 0.3s ease-in-out">
+              <CircularProgressLabel fontSize="20px" fontWeight="bold">
+                {completedPercentage.toFixed(0)}%
+              </CircularProgressLabel>
+            </CircularProgress>
+            <Text mt="10px" fontSize="16px" color="gray.600">
+              Libros completados
+            </Text>
+            <Text fontSize="14px" color="gray.500">
+              {completedBooks.length} de {totalBooks} libros
+            </Text>
+          </Box>
+        </Box>
+      </Flex>
     </Skeleton>
   );
 };
 
-export default BooksList;
+export default ListOfBooks;
+
 
