@@ -23,5 +23,5 @@ export const useUserData = () => {
     }
   }, [mounted, user]);
 
-  return { loading, userData };
+  return { loading, userData, setUserData };
 };
