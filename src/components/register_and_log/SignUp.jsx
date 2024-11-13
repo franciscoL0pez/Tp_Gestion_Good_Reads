@@ -27,7 +27,7 @@ const SignUp = () => {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [isAuthor, setIsAuthor] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const router = useRouter();
   const toast = useToast();
 
@@ -35,7 +35,6 @@ const SignUp = () => {
   const following = [];
 
   const releases = 0;
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,6 +74,8 @@ const SignUp = () => {
 
       await updateProfile(user, {
         displayName: `${name} ${lastName}`,
+        photoURL:
+          "https://firebasestorage.googleapis.com/v0/b/login-29a91.appspot.com/o/users%2Fdefault_profile_pic.jpg?alt=media&token=eec674ba-42a5-43ba-98dc-8198183a3530",
       });
 
       await createUser({

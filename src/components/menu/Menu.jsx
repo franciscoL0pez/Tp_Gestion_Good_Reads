@@ -1,8 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Flex, Image, Box, Collapse, IconButton, useDisclosure } from "@chakra-ui/react";
-import { Book, Logout, Home2, Profile2User, User, Menu as MenuIcon } from "iconsax-react";
+import {
+  Button,
+  Flex,
+  Image,
+  Box,
+  Collapse,
+  IconButton,
+  useDisclosure,
+} from "@chakra-ui/react";
+import {
+  Book,
+  Logout,
+  Home2,
+  Profile2User,
+  User,
+  Menu as MenuIcon,
+} from "iconsax-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
@@ -98,6 +113,7 @@ const Menu = () => {
         direction={"column"}
         gap={"15px"}
         display={{ base: "none", md: "flex" }}
+        alignItems={"center"}
       >
         <MenuLink href="/home/home2" title="Home">
           <Home2 size="28" color="black" />
