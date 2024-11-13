@@ -22,6 +22,57 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { createReview, updateReview, deleteReview } from "@/services/reviews";
 import { UserModal } from "@/services/users"
+import { updateDoc } from "firebase/firestore";
+
+
+const FollowButon = ({user, review}) =>{
+  const [isFollowing, setIsFollowing] = useState(false)
+
+  const handleFollow = async() => {
+    
+    try {
+  
+      const followedUser = doc(db, "users", review?.user?.uid);
+      const User = doc(db, "users", user?.uid);
+      if (isFollowing) {
+        
+        await updateDoc (followedUser, {followers: increment(-1),});
+        await updateDoc (User, {following: increment(-1),});
+      } else {
+        await updateDoc (followedUser, {followers: increment(1),});
+        await updateDoc (User, {following: increment(1),});
+      }
+
+      setIsFollowing(!isFollowing);
+
+    } catch (e) {
+      console.error("Error following user:", e);
+    }
+
+  }
+
+  return (
+    <>
+    {user?.uid !== review?.user?.uid &&(
+      <Button
+        width="70px"
+        height="30px"
+        fontSize="12px"
+        fontWeight="2px"
+        colorScheme={isFollowing ? "green" : "blue"}
+        borderRadius="10px"
+        color="white"
+        _hover={{ backgroundColor: isFollowing ? "green.600" : "blue.600" }}
+        onClick={handleFollow}
+        >
+        {isFollowing ? "siguiendo" : "seguir"}
+      </Button>
+    )}
+    </>
+  )
+
+}
+
 
 const ReviewItem = ({ review, onDelete }) => {
   const [user] = useAuthState(auth);
@@ -60,38 +111,27 @@ const ReviewItem = ({ review, onDelete }) => {
                       {review?.user?.name + " " + review?.user?.lastName}
                     </Text>
                     {user?.uid !== review?.user?.uid && (
-                    <Button
-                      width="70px"
-                      height="30px"
-                      fontSize="12px"
-                      fontWeight="2px"
-                      colorScheme="blue"
-                      borderRadius="10px"
-                      color="white"
-                      _hover={{ backgroundColor: "blue.600" }}
-                      onClick={() => alert("siguiendo")}>
-                      seguir
-                    </Button>
+                      <FollowButon user={user} review={review} />
                     )}
                   </Flex>
 
                   <Flex alignItems="flex-start" gap={"10px"}>
                     <Text Text fontSize={"18px"}>
-                      Seguidores: 
+                      Seguidores: {review?.user?.followers}
                     </Text>
                     <Text Text fontSize={"18px"}>
-                      Seguidos: 
+                      Seguidos: {review?.user?.following}
                     </Text>
                   </Flex>
 
                   <Flex alignItems="flex-start" gap={"10px"}>
 
                     <Text Text fontSize={"18px"}>
-                      Reseñas: 
+                      Reseñas: {review?.user?.releases}
                     </Text>
 
                     <Text fontSize={"18px"}>
-                    {review?.user?.isAuthor && "Publicaciones: "}
+                    {review?.user?.isAuthor && "Publicaciones: "} 
                     </Text>
                   </Flex>
                 </Flex>
