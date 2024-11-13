@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Button, Flex, Heading, Text, Image, Icon } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Text, Image, Icon, Divider } from "@chakra-ui/react";
 import { getAuth } from "firebase/auth";
 import { app } from "@/services/firebase";
 import { useUserData } from "@/hooks/useUserData";
@@ -21,7 +21,7 @@ const UserProfile = () => {
       w={"100%"}
       h={"100%"}
       p={"5%"}
-      bg={"white"} // Fondo blanco
+      bg={"white"}
       direction={"column"}
       align={"center"}
       justify={"center"}
@@ -33,25 +33,13 @@ const UserProfile = () => {
         maxW={"800px"}
         gap={"20px"}
         align={"center"}
-        justify={"space-between"}
+        justify={"center"} // Centrado
         mb={"20px"}
         borderBottom={"3px solid #48BB78"} // Línea verde debajo del título
       >
         <Heading fontSize={"xl"} color={"#2f855a"} fontWeight={"bold"}>
           Perfil de Usuario
         </Heading>
-        <Button
-          colorScheme="green"
-          variant="solid"
-          size="md"
-          _hover={{
-            transform: "scale(1.05)", // Animación suave al pasar el ratón
-            boxShadow: "xl",
-            backgroundColor: "#38a169", // Cambio de color en hover
-          }}
-        >
-          <a href="/home">Volver</a>
-        </Button>
       </Flex>
 
       {/* Caja del perfil */}
@@ -132,7 +120,7 @@ const UserProfile = () => {
             position="absolute"
             top={5}
             right={5}
-            animation="bounce 2s infinite" // Animación de rebote
+            animation="bounce 2s infinite"
             transform="scale(1.5)"
           />
         </Flex>
@@ -159,6 +147,7 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
 
 
 
