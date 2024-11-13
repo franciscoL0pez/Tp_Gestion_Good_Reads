@@ -10,6 +10,7 @@ export default function HomePage() {
     <Flex w={"100%"} h={"100%"} p={"5%"}>
       <Heading fontWeight={400} fontSize={"40px"}>
         Bienvenido {user.displayName}
+        
       </Heading>
     </Flex>
   );

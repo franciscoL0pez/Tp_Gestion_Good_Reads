@@ -21,9 +21,11 @@ import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
 import { createReview, updateReview, deleteReview } from "@/services/reviews";
+import { UserModal } from "@/services/users"
 
 const ReviewItem = ({ review, onDelete }) => {
   const [user] = useAuthState(auth);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   return (
     <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"} position="relative">
@@ -32,11 +34,77 @@ const ReviewItem = ({ review, onDelete }) => {
         src={review?.user?.photoURL}
       />
       <Flex direction={"column"} ml={"10px"} gap={"4px"}>
-        <Text fontSize={"16px"} fontWeight={"bold"}>
+        <Text 
+          fontSize={"16px"} 
+          fontWeight={"bold"}
+          _hover={{ textDecoration: "underline", cursor: "pointer"}}
+          onClick={() => setIsUserModalOpen(true)}
+        >
+          <Modal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)}
+            size="2xl"
+          >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalCloseButton />
+            <ModalBody
+            >
+              <Flex direction="row" align="center" gap="20px">
+                <Avatar
+                  name={review?.user?.name + " " + review?.user?.lastName}
+                  src={review?.user?.photoURL}
+                  size = "xl"
+                />
+                <Flex direction="column" align="flex-start" gap="20px">
+                  <Flex direction="row" alignItems="flex-start" gap="20px">
+                    <Text fontSize={"16px"}>
+                      {review?.user?.name + " " + review?.user?.lastName}
+                    </Text>
+                    {user?.uid !== review?.user?.uid && (
+                    <Button
+                      width="70px"
+                      height="30px"
+                      fontSize="12px"
+                      fontWeight="2px"
+                      colorScheme="blue"
+                      borderRadius="10px"
+                      color="white"
+                      _hover={{ backgroundColor: "blue.600" }}
+                      onClick={() => alert("siguiendo")}>
+                      seguir
+                    </Button>
+                    )}
+                  </Flex>
+
+                  <Flex alignItems="flex-start" gap={"10px"}>
+                    <Text Text fontSize={"18px"}>
+                      Seguidores: 
+                    </Text>
+                    <Text Text fontSize={"18px"}>
+                      Seguidos: 
+                    </Text>
+                  </Flex>
+
+                  <Flex alignItems="flex-start" gap={"10px"}>
+
+                    <Text Text fontSize={"18px"}>
+                      Reseñas: 
+                    </Text>
+
+                    <Text fontSize={"18px"}>
+                    {review?.user?.isAuthor && "Publicaciones: "}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              <Text fontSize={"16px"} color={"gray.500"}>
+                {review?.user?.isAuthor? "Escritor" : "Lector"}
+              </Text>
+              
+            </ModalBody>
+          </ModalContent>
+        </Modal>
           {review?.user?.name + " " + review?.user?.lastName}
-        </Text>
-        <Text fontSize={"14px"} color={"gray.500"}>
-          {review?.user?.isAuthor? "Escritor" : "Lector"}
         </Text>
         <Flex>
           {[1, 2, 3, 4, 5].map((i) => (
@@ -49,8 +117,11 @@ const ReviewItem = ({ review, onDelete }) => {
             />
           ))}
         </Flex>
+
         <Text fontSize={"14px"}>{review?.content}</Text>
       </Flex>
+
+      
 
       {/* Esta cruz la muestro solo si es el usuario que escribio la reseña */}
       {user?.uid === review?.user?.uid && (
