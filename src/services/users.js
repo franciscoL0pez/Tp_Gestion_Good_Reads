@@ -29,6 +29,8 @@ const getUser = async (uid) => {
     const users = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
+      followers: doc.data().followers || [],
+      following: doc.data().following || [],
     }));
     return users[0];
   } catch (e) {
@@ -37,9 +39,26 @@ const getUser = async (uid) => {
   }
 };
 
+const getUsers = async () => {
+  try {
+    const collectionRef = collection(db, "users");
+    const querySnapshot = await getDocs(collectionRef);
+
+    const users = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+      followers: doc.data().followers || [],
+      following: doc.data().following || [],
+    }));
+    return users;
+  } catch (e) {
+    console.error("Error getting document:", e);
+    return null;
+  }
+};
+
 const updateUser = async (uid, data) => {
   try {
-
     const dbUser = await getUser(uid);
 
     const userRef = doc(db, "users", dbUser.id);
@@ -53,4 +72,4 @@ const updateUser = async (uid, data) => {
   }
 };
 
-export { createUser, getUser, updateUser };
+export { createUser, getUser, updateUser, getUsers };
