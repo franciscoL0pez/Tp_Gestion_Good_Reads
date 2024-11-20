@@ -28,7 +28,7 @@ const IN_PROGRESS = "in_progress";
 const COMPLETED = "completed";
 
 const BookItem = ({ book, onMove, inProgress }) => {
-  // Validación de datos esenciales
+ 
   if (!book || !book.title || !book.cover ) {
     return (
       <Alert status="error" borderRadius="15px" mb="10px">
@@ -129,64 +129,28 @@ const ListOfBooks = () => {
 
   const markAsCompleted = async (book) => {
     try {
-
       await updateBooklist(user.uid, book.id, COMPLETED);
-      // Actualizar la lista de libros en progreso
-      setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
-      
-      // Agregar el libro a la lista de completados
-      setCompletedBooks((prev) => {
-        // Evitar duplicados si el libro ya existe en la lista
-        if (!prev.some((b) => b.id === book.id)) {
-          return [...prev, book];
-        }
-        return prev;
-      });
-  
-      // Actualizar la base de datos o estado remoto
-
+      await loadBookLists(user.uid);
   
       console.log(`Libro "${book.title}" marcado como completado.`);
     } catch (error) {
       console.error("Error al mover el libro a completados:", error);
-  
-      // revertir cambios en el estado local si ocurre un error
-      setBooksInProgress((prev) => [...prev, book]);
-      setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
+      alert("Hubo un problema al marcar el libro como completado.");
     }
   };
   
-
   const moveToInProgress = async (book) => {
     try {
-
       await updateBooklist(user.uid, book.id, IN_PROGRESS);
-      console.log(`Moviendo el libro "${book.title}" a la lista de "en progreso".`);
-
- 
-      // Actualizar la lista de completados eliminando el libro
-      setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
-      
-      // Agregar el libro a la lista de libros en progreso
-      setBooksInProgress((prev) => {
-        // Evitar duplicados si el libro ya existe en la lista
-        if (!prev.some((b) => b.id === book.id)) {
-          return [...prev, book];
-        }
-        return prev;
-      });
-  
-    
+      await loadBookLists(user.uid);
   
       console.log(`Libro "${book.title}" movido a "en progreso".`);
     } catch (error) {
       console.error("Error al mover el libro a 'en progreso':", error);
-  
-      // Revertir cambios locales en caso de error
-      setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
-      setCompletedBooks((prev) => [...prev, book]);
+      alert("Hubo un problema al mover el libro a 'en progreso'.");
     }
   };
+  
   
   // Calcular las estadísticas
   const totalBooks = booksInProgress.length + completedBooks.length;
