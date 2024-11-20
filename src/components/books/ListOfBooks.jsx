@@ -29,7 +29,7 @@ const COMPLETED = "completed";
 
 const BookItem = ({ book, onMove, inProgress }) => {
   // Validación de datos esenciales
-  if (!book || !book.title || !book.cover || typeof onMove !== "function") {
+  if (!book || !book.title || !book.cover ) {
     return (
       <Alert status="error" borderRadius="15px" mb="10px">
         <AlertIcon />
@@ -109,7 +109,7 @@ const BookItem = ({ book, onMove, inProgress }) => {
 const ListOfBooks = () => {
   const [booksInProgress, setBooksInProgress] = useState([]);
   const [completedBooks, setCompletedBooks] = useState([]);
-  const [user] = useAuthState(auth); // Uso el hook de useUserData para obtener el usuario actual
+  const [user] = useAuthState(auth);
 
   useEffect(() => {
     if (user) {
@@ -129,6 +129,8 @@ const ListOfBooks = () => {
 
   const markAsCompleted = async (book) => {
     try {
+
+      await updateBooklist(user.uid, book.id, COMPLETED);
       // Actualizar la lista de libros en progreso
       setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
       
@@ -142,13 +144,13 @@ const ListOfBooks = () => {
       });
   
       // Actualizar la base de datos o estado remoto
-      await updateBooklist(user.uid, book.id, COMPLETED);
+
   
       console.log(`Libro "${book.title}" marcado como completado.`);
     } catch (error) {
       console.error("Error al mover el libro a completados:", error);
   
-      // Opcional: revertir cambios en el estado local si ocurre un error
+      // revertir cambios en el estado local si ocurre un error
       setBooksInProgress((prev) => [...prev, book]);
       setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
     }
@@ -157,8 +159,11 @@ const ListOfBooks = () => {
 
   const moveToInProgress = async (book) => {
     try {
+
+      await updateBooklist(user.uid, book.id, IN_PROGRESS);
       console.log(`Moviendo el libro "${book.title}" a la lista de "en progreso".`);
-  
+
+ 
       // Actualizar la lista de completados eliminando el libro
       setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
       
@@ -171,8 +176,7 @@ const ListOfBooks = () => {
         return prev;
       });
   
-      // Actualizar el estado remoto
-      await updateBooklist(user.uid, book.id, IN_PROGRESS);
+    
   
       console.log(`Libro "${book.title}" movido a "en progreso".`);
     } catch (error) {
