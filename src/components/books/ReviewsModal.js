@@ -313,7 +313,3 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
 };
 
 export default ReviewsModal;
-
-
-
-

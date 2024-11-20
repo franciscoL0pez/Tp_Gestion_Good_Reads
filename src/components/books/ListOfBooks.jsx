@@ -13,14 +13,31 @@ import {
   CircularProgress,
   CircularProgressLabel,
   useBreakpointValue,
-  ScaleFade,
   SlideFade,
+  Alert, 
+  AlertIcon
 } from "@chakra-ui/react";
+
+
 import { useState, useEffect } from "react";
-import { getBookLists, updateBookList } from "@/services/bookList"; // Servicio para interactuar con Firebase
-import { useUserData } from "@/hooks/useUserData";  // Hook para obtener el usuario actual
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/services/firebase";
+// Importamos los servicios
+import { getBooklist, updateBooklist } from "@/services/bookList";
+const IN_PROGRESS = "in_progress";
+const COMPLETED = "completed";
 
 const BookItem = ({ book, onMove, inProgress }) => {
+ 
+  if (!book || !book.title || !book.cover ) {
+    return (
+      <Alert status="error" borderRadius="15px" mb="10px">
+        <AlertIcon />
+        Información del libro incompleta o función onMove no proporcionada.
+      </Alert>
+    );
+  }
+
   return (
     <Card
       p="20px"
@@ -39,28 +56,60 @@ const BookItem = ({ book, onMove, inProgress }) => {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
       }}
     >
-      <Text fontSize="16px" fontWeight="bold" color="gray.800" letterSpacing="0.5px">
-        {book.title}
-      </Text>
+      <Flex direction="row" align="center">
+        {/* Imagen del libro */}
+        <Box
+          mr="15px"
+          maxW="60px"
+          maxH="90px"
+          overflow="hidden"
+          borderRadius="10px"
+          boxShadow="lg"
+        >
+          <img
+            src={book.cover}
+            alt={book.title}
+            style={{ width: "100%", height: "auto" }}
+            onError={(e) => {
+              e.target.src = "/default-cover.png"; // Imagen por defecto si falla la carga
+              e.target.alt = "Imagen no disponible";
+            }}
+          />
+        </Box>
+
+        {/* Título del libro */}
+        <Text fontSize="16px" fontWeight="bold" color="gray.800" letterSpacing="0.5px">
+          {book.title || "Título no disponible"}
+        </Text>
+      </Flex>
+
       <Button
         colorScheme={inProgress ? "green" : "blue"}
         variant="solid"
         size="sm"
-        onClick={() => onMove(book)}
+        onClick={() => {
+          try {
+            onMove(book); // Llamada a la función pasada como prop
+          } catch (error) {
+            console.error("Error al ejecutar onMove:", error);
+            alert("Hubo un problema al mover el libro.");
+          }
+        }}
         _hover={{
           bg: inProgress ? "green.600" : "blue.600",
         }}
       >
-        {inProgress ? "Completado" : "Lectura en curso"}
+        {inProgress ? "Lectura en curso" : "Completada"}
       </Button>
     </Card>
   );
 };
 
+
 const ListOfBooks = () => {
   const [booksInProgress, setBooksInProgress] = useState([]);
   const [completedBooks, setCompletedBooks] = useState([]);
-  const { user } = useUserData(); // Uso el hook de useUserData para obtener el usuario actual
+  const [user] = useAuthState(auth);
 
   useEffect(() => {
     if (user) {
@@ -70,7 +119,7 @@ const ListOfBooks = () => {
 
   const loadBookLists = async (uid) => {
     try {
-      const { booksInProgress, completedBooks } = await getBookLists(uid);
+      const { booksInProgress, completedBooks } = await getBooklist(uid);
       setBooksInProgress(booksInProgress);
       setCompletedBooks(completedBooks);
     } catch (error) {
@@ -79,17 +128,30 @@ const ListOfBooks = () => {
   };
 
   const markAsCompleted = async (book) => {
-    setBooksInProgress((prev) => prev.filter((b) => b.id !== book.id));
-    setCompletedBooks((prev) => [...prev, book]);
-    await updateBookList(user.uid, booksInProgress, completedBooks);
+    try {
+      await updateBooklist(user.uid, book.id, COMPLETED);
+      await loadBookLists(user.uid);
+  
+      console.log(`Libro "${book.title}" marcado como completado.`);
+    } catch (error) {
+      console.error("Error al mover el libro a completados:", error);
+      alert("Hubo un problema al marcar el libro como completado.");
+    }
   };
-
+  
   const moveToInProgress = async (book) => {
-    setCompletedBooks((prev) => prev.filter((b) => b.id !== book.id));
-    setBooksInProgress((prev) => [...prev, book]);
-    await updateBookList(user.uid, booksInProgress, completedBooks);
+    try {
+      await updateBooklist(user.uid, book.id, IN_PROGRESS);
+      await loadBookLists(user.uid);
+  
+      console.log(`Libro "${book.title}" movido a "en progreso".`);
+    } catch (error) {
+      console.error("Error al mover el libro a 'en progreso':", error);
+      alert("Hubo un problema al mover el libro a 'en progreso'.");
+    }
   };
-
+  
+  
   // Calcular las estadísticas
   const totalBooks = booksInProgress.length + completedBooks.length;
   const completedPercentage = totalBooks === 0 ? 0 : (completedBooks.length / totalBooks) * 100;
@@ -150,8 +212,12 @@ const ListOfBooks = () => {
             <Box maxH="300px" overflowY="auto">
               <VStack spacing={4} align="stretch">
                 {booksInProgress.length > 0 ? (
+             
                   booksInProgress.map((book) => (
-                    <BookItem key={book.id} book={book} onMove={markAsCompleted} inProgress />
+                    
+                     
+                    <BookItem key = {book} book = {book.book} onMove={markAsCompleted} inProgress  />
+                    
                   ))
                 ) : (
                   <Text fontSize="14px" color="gray.600">
@@ -170,8 +236,10 @@ const ListOfBooks = () => {
             <Box maxH="300px" overflowY="auto">
               <VStack spacing={4} align="stretch">
                 {completedBooks.length > 0 ? (
+                  
                   completedBooks.map((book) => (
-                    <BookItem key={book.id} book={book} onMove={moveToInProgress} />
+                   
+                    <BookItem key={book} book={book.book} onMove ={moveToInProgress}  />
                   ))
                 ) : (
                   <Text fontSize="14px" color="gray.600">
@@ -206,7 +274,7 @@ const ListOfBooks = () => {
             Estadísticas de Lecturas
           </Heading>
           <Divider mb="15px" borderColor="teal.500" />
-          
+
           {/* Circular Progress Bar */}
           <Box display="flex" flexDirection="column" alignItems="center">
             <CircularProgress value={completedPercentage} size="120px" color="green.400" thickness="8px" transition="all 0.3s ease-in-out">
@@ -228,5 +296,7 @@ const ListOfBooks = () => {
 };
 
 export default ListOfBooks;
+
+
 
 
