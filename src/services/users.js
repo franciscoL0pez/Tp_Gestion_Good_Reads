@@ -1,4 +1,4 @@
-import { db } from "@/services/firebase";
+import { db, storage } from "@/services/firebase";
 import {
   collection,
   addDoc,
@@ -8,6 +8,7 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
+import { getDownloadURL, ref } from "firebase/storage";
 
 const createUser = async (data) => {
   try {
@@ -44,13 +45,27 @@ const getUsers = async () => {
     const collectionRef = collection(db, "users");
     const querySnapshot = await getDocs(collectionRef);
 
-    const users = querySnapshot.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-      followers: doc.data().followers || [],
-      following: doc.data().following || [],
-    }));
-    return users;
+    const promises = querySnapshot.docs.map(async (doc) => {
+      const storageRef = ref(storage, `users/${doc.data().uid}/profile`);
+
+      let imageUrl;
+
+      try {
+        imageUrl = await getDownloadURL(storageRef);
+      } catch (error) {
+        imageUrl =
+          "https://firebasestorage.googleapis.com/v0/b/login-29a91.appspot.com/o/users%2Fdefault_profile_pic.jpg?alt=media&token=eec674ba-42a5-43ba-98dc-8198183a3530";
+      }
+
+      return {
+        ...doc.data(),
+        id: doc.id,
+        followers: doc.data().followers || [],
+        following: doc.data().following || [],
+        photoURL: imageUrl,
+      };
+    });
+    return await Promise.all(promises);
   } catch (e) {
     console.error("Error getting document:", e);
     return null;
