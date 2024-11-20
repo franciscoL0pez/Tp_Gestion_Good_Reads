@@ -1,63 +1,116 @@
 import { db } from "@/services/firebase";
 import {
   doc,
-  getDoc,
+  getDocs,
   updateDoc,
-  setDoc,
   arrayUnion,
   arrayRemove,
   deleteDoc,
+  addDoc,
+  collection,
+  query,
+  where
 } from "firebase/firestore";
 
+import { getBook } from "@/services/books";
 
-const createOrUpdateBooklist = async (uid, inProgress = [], completed = []) => {
+const IN_PROGRESS = "in_progress"
+const COMPLETED = "completed"
+
+const collectionName = "lectures"
+
+
+const createBooklist = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
+    const booklistRef = await addDoc(collection(db, collectionName), {
+      uid,
+      bookId,
+      status: IN_PROGRESS
+    });
 
-    const booklistSnap = await getDoc(booklistRef);
+    const bookListId = booklistRef.id;
+   
+    const book = await getBook(bookId)
 
-    if (booklistSnap.exists()) {
-      
-      await updateDoc(booklistRef, {
-        inProgress: arrayUnion(...inProgress),
-        completed: arrayUnion(...completed),
-      });
-    } else {
-      
-      await setDoc(booklistRef, {
-        inProgress,
-        completed,
-      });
-    }
-
-    return true; 
+    return {
+      id: bookListId,
+      uid,
+      book,
+    };
   } catch (e) {
-    console.error("Error creating or updating booklist:", e);
-    return false; 
+    console.log("ERROR", e)
+   
+    return null;
   }
 };
+
 
 
 const getBooklist = async (uid) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
-    const booklistSnap = await getDoc(booklistRef);
+    const collectionRef = collection(db, collectionName);
+    const q = query(collectionRef, where("uid", "==", uid));
 
-    if (booklistSnap.exists()) {
-      return booklistSnap.data(); 
-    } else {
-      return { inProgress: [], completed: [] }; 
-    }
+    const querySnapshot = await getDocs(q);
+
+    const lectures = await Promise.all(querySnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+
+      const book = await getBook(data.bookId);
+
+      return {
+        id: doc.id,
+        uid: data.uid,
+        book,
+        status: data.status
+      };
+    }));
+
+
+    const booksInProgress = lectures.filter(lecture => lecture.status === IN_PROGRESS );
+    const completedBooks = lectures.filter(lecture => lecture.status === COMPLETED );
+
+    return { booksInProgress, completedBooks };
   } catch (e) {
     console.error("Error getting booklist:", e);
-    return { inProgress: [], completed: [] }; 
+    return { booksInProgress: [], completedBooks: [] }; 
+  }
+};
+
+const getLectureByBookId = async (uid, bookId) => {
+  try {
+    
+   
+    const collectionRef = collection(db, collectionName);
+    const q = query(collectionRef, where("uid", "==", uid), where("bookId", "==", bookId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    const book = await getBook(data.bookId);
+
+    return {
+      id: doc.id,
+      uid: data.uid,
+      book,
+      status: data.status
+    };
+  } catch (e) {
+    console.error("Error getting lecture by bookId:", e);
+    return null;
   }
 };
 
 
+
 const addToInProgress = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
+    
+    const booklistRef = doc(db, collectionName, uid);
     await updateDoc(booklistRef, {
       inProgress: arrayUnion(bookId), 
     });
@@ -71,7 +124,7 @@ const addToInProgress = async (uid, bookId) => {
 
 const removeFromInProgress = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
+    const booklistRef = doc(db, collectionName, uid);
     await updateDoc(booklistRef, {
       inProgress: arrayRemove(bookId), 
     });
@@ -85,7 +138,7 @@ const removeFromInProgress = async (uid, bookId) => {
 
 const addToCompleted = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
+    const booklistRef = doc(db, collectionName, uid);
     await updateDoc(booklistRef, {
       completed: arrayUnion(bookId), 
     });
@@ -99,7 +152,7 @@ const addToCompleted = async (uid, bookId) => {
 
 const removeFromCompleted = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
+    const booklistRef = doc(db, collectionName, uid);
     await updateDoc(booklistRef, {
       completed: arrayRemove(bookId), 
     });
@@ -113,7 +166,7 @@ const removeFromCompleted = async (uid, bookId) => {
 
 const markAsCompleted = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
+    const booklistRef = doc(db, collectionName, uid);
     await updateDoc(booklistRef, {
       inProgress: arrayRemove(bookId), 
       completed: arrayUnion(bookId),  
@@ -126,22 +179,44 @@ const markAsCompleted = async (uid, bookId) => {
 };
 
 
-const deleteBooklist = async (uid) => {
+const deleteLecture = async (uid, bookId) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
-    await deleteDoc(booklistRef); 
-    return true;
+  
+    const lecture = await getLectureByBookId(uid, bookId);
+   
+    if (lecture) {
+    
+      const booklistRef = doc(db, collectionName, lecture.id);
+      await deleteDoc(booklistRef);
+      return true;
+    }
+
+    return false;
   } catch (e) {
     console.error("Error deleting booklist:", e);
     return false;
   }
 };
 
-const updateBooklist = async (uid, updatedData) => {
+// UPDATE status in database with bookId and uide
+
+const updateBooklist = async (uid, bookId, newStatus) => {
   try {
-    const booklistRef = doc(db, "booklists", uid);
-    await updateDoc(booklistRef, updatedData); 
-    return true;
+  
+    const lecture = await getLectureByBookId(uid, bookId);
+
+    if (lecture) {
+      const booklistRef = doc(db, collectionName, lecture.id);
+      const updatedData = {
+        status: newStatus
+      };
+
+      await updateDoc(booklistRef, updatedData); 
+      return true
+
+    }
+    
+    return false;
   } catch (e) {
     console.error("Error updating booklist:", e);
     return false;
@@ -149,14 +224,15 @@ const updateBooklist = async (uid, updatedData) => {
 };
 
 export {
-  createOrUpdateBooklist,
   getBooklist,
   addToInProgress,
   removeFromInProgress,
   addToCompleted,
   removeFromCompleted,
   markAsCompleted,
-  deleteBooklist,
-  updateBooklist
+  deleteLecture,
+  updateBooklist,
+  createBooklist,
+  getLectureByBookId,
 };
 

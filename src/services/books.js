@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
 } from "firebase/firestore";
@@ -118,5 +119,37 @@ const getBooks = async () => {
 };
 
 
+const getBook = async (bookId) => {
+  try {
+    const bookRef = doc(db, "books", bookId);
 
-export { createBook, getBooks, updateBook };
+    const book = await getDoc(bookRef);
+
+    const pdfPath = `${book.data().uid}/books/${book.id}/pdf`;
+    const coverPath = `${book.data().uid}/books/${book.id}/cover`;
+
+    const pdfRef = ref(storage, pdfPath);
+    const coverRef = ref(storage, coverPath);
+
+    const pdfUrl = await getDownloadURL(pdfRef);
+    const coverUrl = await getDownloadURL(coverRef);
+
+    const author = await getUser(book.data().uid);
+    const reviews = await getReviews(book.id);
+
+    return {
+      id: book.id,
+      ...book.data(),
+      pdf: pdfUrl,
+      cover: coverUrl,
+      author,
+      reviews,
+    };
+  } catch (e) {
+    return null
+  }
+}
+
+
+
+export { createBook, getBooks, getBook, updateBook };
