@@ -93,27 +93,36 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
           ))}
         </Flex>
         <Text fontSize={"14px"}>{review?.content}</Text>
-
+  
         <Button variant="link" onClick={handleToggleComments} colorScheme="blue">
           {showComments ? "Ocultar comentarios" : "Ver comentarios"}
         </Button>
-
+  
         {showComments && (
           <Box mt={3}>
             {loadingComments ? (
               <Text>Cargando comentarios...</Text>
             ) : comments.length ? (
               comments.map((comment) => (
-                <Flex key={comment.id} direction="column" p={2} borderWidth={1} borderRadius="8px" mb={2}>
+                <Flex 
+                  key={comment.id} 
+                  direction="column" 
+                  p={2} 
+                  borderWidth={1} 
+                  borderRadius="8px" 
+                  mb={2} 
+                  position="relative" // Necesario para el posicionamiento absoluto del botón
+                >
                   <Text fontWeight="bold">{comment.user.name}</Text>
                   <Text>{comment.content}</Text>
+  
                   {user?.uid === comment.uid && (
                     <IconButton
                       icon={<CloseIcon />}
                       size="sm"
                       position="absolute"
-                      top="5px"
-                      right="5px"
+                      top="5px" // Ajusta la posición según lo que necesites
+                      right="5px" // Ajusta la posición según lo que necesites
                       aria-label="Eliminar comentario"
                       colorScheme="red"
                       onClick={() => handleDeleteComment(comment.id)} 
@@ -126,7 +135,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
             )}
           </Box>
         )}
-
+  
         {/* Campo para agregar un nuevo comentario */}
         {user && (
           <Flex mt={3} direction="column">
@@ -149,7 +158,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
           </Flex>
         )}
       </Flex>
-
+  
       {user?.uid === review?.user?.uid && (
         <IconButton
           icon={<CloseIcon />}
@@ -164,7 +173,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
       )}
     </Flex>
   );
-};
+};  
 
 
 
