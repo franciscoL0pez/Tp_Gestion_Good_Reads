@@ -104,4 +104,112 @@ const deleteReview = async (reviewId) => {
   }
 };
 
-export { createReview, updateReview, getReviews, deleteReview };
+
+/// ----------- Comments --------------- ///
+const createComment = async (reviewId, uid, content) => {
+  try {
+    const commentRef = await addDoc(collection(db, "comments"), {
+      reviewId,
+      uid,
+      content,
+      createdAt: new Date(), // Fecha de creación
+    });
+    const commentId = commentRef.id;
+
+    const user = await getUser(uid);
+
+    return {
+      id: commentId,
+      reviewId,
+      uid,
+      content,
+      user,
+      createdAt: new Date(), // Fecha de creación
+    };
+  } catch (e) {
+    console.error("Error adding document:", e);
+    return null;
+  }
+};
+
+const commentEditor = ({ reviewId, onCommentAdded }) => {
+  const [commentContent, setCommentContent] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [user] = useAuthState(auth);
+
+  const handleAddComment = async () => {
+    if (!commentContent.trim()) {
+      return; // No agregar comentario vacío
+    }
+    setLoading(true);
+
+    const newComment = await createComment(reviewId, user.uid, user.displayName, commentContent);
+    onCommentAdded(newComment);
+
+    setCommentContent("");
+    setLoading(false);
+  };
+
+  return (
+    <Box mt={3}>
+      <Textarea
+        placeholder="Escribe tu comentario aquí..."
+        value={commentContent}
+        onChange={(e) => setCommentContent(e.target.value)}
+        h="100px"
+        resize="none"
+      />
+      <Flex justify="flex-end" mt={2}>
+        <Button colorScheme="blue" onClick={handleAddComment} isLoading={loading}>
+          Agregar comentario
+        </Button>
+      </Flex>
+    </Box>
+  );
+};
+
+
+
+
+const getComments = async (reviewId) => {
+  try {
+    const collectionRef = collection(db, "comments");
+    const q = query(collectionRef, where("reviewId", "==", reviewId));
+
+    const querySnapshot = await getDocs(q);
+
+    const comments = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
+
+    // Obtener información de los usuarios que comentaron
+    return await Promise.all(
+      comments.map(async (comment) => {
+        const user = await getUser(comment.uid);
+        return {
+          id: comment.id,
+          ...comment,
+          user,
+        };
+      })
+    );
+  } catch (e) {
+    console.error("Error getting comments:", e);
+    return [];
+  }
+};
+
+
+const deleteComment = async (commentId) => {
+  try {
+    const commentRef = doc(db, "comments", commentId);
+    await deleteDoc(commentRef);
+    return true;
+  } catch (e) {
+    console.error("Error deleting comment:", e);
+    return false;
+  }
+};
+
+export { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,commentEditor };
