@@ -40,10 +40,20 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
   };
 
   const handleToggleComments = async () => {
-    if (showComments && !comments.length) {
-      await fetchComments(review.id);
-    }
     setShowComments(!showComments);
+  
+    if (!showComments) {
+      // Si se va a mostrar los comentarios, cargarlos
+      setLoadingComments(true);
+      try {
+        const fetchedComments = await getComments(review.id); // Asume que tienes una función que obtiene los comentarios
+        setComments(fetchedComments);
+      } catch (error) {
+        console.error("Error loading comments:", error);
+      } finally {
+        setLoadingComments(false);
+      }
+    }
   };
 
   const handleAddComment = async () => {
@@ -56,6 +66,20 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     onCommentAdded(createdComment); // Llamar a la función onCommentAdded si se pasa
 
     setLoadingCommentCreation(false);
+  };
+
+  const handleDeleteComment = async (commentID) => {
+    await deleteComment(commentID);
+    setLoadingComments(true);
+    try {
+      const fetchedComments = await getComments(review.id);
+      setComments(fetchedComments);
+    } catch (error) { 
+      console.error("Error loading comments:", error);
+    } finally {
+      setLoadingComments(false);
+    }
+    
   };
 
   return (
@@ -92,7 +116,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
                       right="5px"
                       aria-label="Eliminar comentario"
                       colorScheme="red"
-                      onClick={() => deleteComment(comment.id)} 
+                      onClick={() => handleDeleteComment(comment.id)} 
                     />
                   )}
                 </Flex>
