@@ -15,6 +15,8 @@ import {
   Textarea,
   useToast, // Importamos useToast de Chakra UI
 } from "@chakra-ui/react";
+
+import { EditIcon } from "@chakra-ui/icons";
 import { Star1 } from "iconsax-react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
@@ -43,10 +45,10 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     setShowComments(!showComments);
   
     if (!showComments) {
-      // Si se va a mostrar los comentarios, cargarlos
+      // Si tengo que mostar los comentarios los cargo
       setLoadingComments(true);
       try {
-        const fetchedComments = await getComments(review.id); // Asume que tienes una función que obtiene los comentarios
+        const fetchedComments = await getComments(review.id); 
         setComments(fetchedComments);
       } catch (error) {
         console.error("Error loading comments:", error);
@@ -82,6 +84,37 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     
   };
 
+  const handleEditComment = async (reviewId, commentId) => {
+    const currentComment = comments.find((comment) => comment.id === commentId);
+    if (!currentComment) return;
+  
+    // Función para guardar los cambios en el comentario
+    const onSave = async (commentId, newContent) => {
+      try {
+        // Llamamos a la función updateComment para actualizar el comentario en la base de datos
+        await updateComment(reviewId, commentId, newContent);
+  
+        // Actualizamos la lista de comentarios localmente
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.id === commentId ? { ...comment, content: newContent } : comment
+          )
+        );
+      } catch (error) {
+        console.error("Error actualizando el comentario:", error);
+      }
+    };
+  
+    return (
+      <commentEditor
+        commentId={commentId}
+        initialContent={currentComment.content}
+        onSave={onSave}
+      />
+    );
+  };
+
+  
   return (
     <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"} position="relative">
       <Avatar name={review?.user?.name + " " + review?.user?.lastName} src={review?.user?.photoURL} />
@@ -111,22 +144,31 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
                   borderWidth={1} 
                   borderRadius="8px" 
                   mb={2} 
-                  position="relative" // Necesario para el posicionamiento absoluto del botón
+                  position="relative" // Necesario para el posicionamiento absoluto de los botones
                 >
                   <Text fontWeight="bold">{comment.user.name}</Text>
                   <Text>{comment.content}</Text>
   
                   {user?.uid === comment.uid && (
-                    <IconButton
-                      icon={<CloseIcon />}
-                      size="sm"
-                      position="absolute"
-                      top="5px" // Ajusta la posición según lo que necesites
-                      right="5px" // Ajusta la posición según lo que necesites
-                      aria-label="Eliminar comentario"
-                      colorScheme="red"
-                      onClick={() => handleDeleteComment(comment.id)} 
-                    />
+                    <Flex position="absolute" top="5px" right="5px" gap="5px">
+                      {/* Botón de editar */}
+                      <IconButton
+                        icon={<EditIcon />} // Ícono de editar
+                        size="sm"
+                        aria-label="Editar comentario"
+                        colorScheme="green"
+                        onClick={() => handleEditComment(review.id,comment.id)} 
+                      />
+  
+                      {/* Botón de eliminar */}
+                      <IconButton
+                        icon={<CloseIcon />}
+                        size="sm"
+                        aria-label="Eliminar comentario"
+                        colorScheme="red"
+                        onClick={() => handleDeleteComment(comment.id)} 
+                      />
+                    </Flex>
                   )}
                 </Flex>
               ))

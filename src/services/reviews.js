@@ -132,41 +132,71 @@ const createComment = async (reviewId, uid, content) => {
   }
 };
 
-const commentEditor = ({ reviewId, onCommentAdded }) => {
-  const [commentContent, setCommentContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [user] = useAuthState(auth);
 
-  const handleAddComment = async () => {
-    if (!commentContent.trim()) {
-      return; // No agregar comentario vacío
+const updateComment = async (reviewId, commentId, newContent) => {
+  try {
+    const response = await fetch(`/api/reviews/${reviewId}/comments/${commentId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content: newContent }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al actualizar el comentario");
     }
+
+    return await response.json(); // Retorna el comentario actualizado
+  } catch (error) {
+    console.error("Error actualizando el comentario:", error);
+    throw error;
+  }
+};
+
+
+
+// Este es el editor para los comentarios
+const commentEditor = ({ commentId, initialContent, onSave }) => {
+  const [commentContent, setCommentContent] = useState(initialContent);
+  const [loading, setLoading] = useState(false);
+
+  const handleSaveComment = async () => {
+    if (!commentContent.trim()) return; // No guardar comentarios vacíos
+
     setLoading(true);
 
-    const newComment = await createComment(reviewId, user.uid, user.displayName, commentContent);
-    onCommentAdded(newComment);
-
-    setCommentContent("");
-    setLoading(false);
+    try {
+      await onSave(commentId, commentContent); // Llamamos la función que guarda
+    } catch (error) {
+      console.error("Error al guardar el comentario:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Box mt={3}>
       <Textarea
-        placeholder="Escribe tu comentario aquí..."
         value={commentContent}
         onChange={(e) => setCommentContent(e.target.value)}
+        placeholder="Edita tu comentario..."
         h="100px"
         resize="none"
       />
       <Flex justify="flex-end" mt={2}>
-        <Button colorScheme="blue" onClick={handleAddComment} isLoading={loading}>
-          Agregar comentario
+        <Button
+          colorScheme="blue"
+          onClick={handleSaveComment}
+          isLoading={loading}
+        >
+          Guardar comentario
         </Button>
       </Flex>
     </Box>
   );
 };
+
 
 
 
@@ -212,4 +242,4 @@ const deleteComment = async (commentId) => {
   }
 };
 
-export { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,commentEditor };
+export { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,commentEditor,updateComment };
