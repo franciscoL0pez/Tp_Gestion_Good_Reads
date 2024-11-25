@@ -17,6 +17,7 @@ import {
   Profile2User,
   User,
   Menu as MenuIcon,
+  Notification,
 } from "iconsax-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -126,6 +127,9 @@ const Menu = () => {
         </MenuLink>
         <MenuLink href="/home/profile" title="Perfil">
           <User size="28" color="black" />
+        </MenuLink>
+        <MenuLink href="/home/notifications" title="Notificaciones">
+          <Notification size="28" color="black" />
         </MenuLink>
       </Flex>
 
