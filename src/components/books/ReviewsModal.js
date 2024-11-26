@@ -144,20 +144,29 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
                   borderWidth={1} 
                   borderRadius="8px" 
                   mb={2} 
-                  position="relative" // Necesario para el posicionamiento absoluto de los botones
+                  position="relative"
                 >
-                  <Text fontWeight="bold">{comment.user.name}</Text>
+                  <Flex alignItems="center" mb={2}>
+                    {/* Avatar del usuario */}
+                    <Avatar 
+                      name={comment.user.name + " " + comment.user.lastName} 
+                      src={comment.user.photoURL} 
+                      size="sm" 
+                      mr={2} 
+                    />
+                    <Text fontWeight="bold">{comment.user.name + " " + comment.user.lastName}</Text>
+                  </Flex>
                   <Text>{comment.content}</Text>
   
                   {user?.uid === comment.uid && (
                     <Flex position="absolute" top="5px" right="5px" gap="5px">
                       {/* Botón de editar */}
                       <IconButton
-                        icon={<EditIcon />} // Ícono de editar
+                        icon={<EditIcon />} 
                         size="sm"
                         aria-label="Editar comentario"
                         colorScheme="green"
-                        onClick={() => handleEditComment(review.id,comment.id)} 
+                        onClick={() => handleEditComment(review.id, comment.id)} 
                       />
   
                       {/* Botón de eliminar */}
@@ -215,6 +224,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
       )}
     </Flex>
   );
+  
 };  
 
 
