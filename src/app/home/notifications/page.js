@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { useState, 
-  useEffect } from "react";
-import { Box, 
-  Text, 
-  VStack, 
-  Badge, 
-  useDisclosure, 
-  Modal, 
-  ModalOverlay, 
-  ModalContent, 
-  ModalHeader, 
-  ModalCloseButton, 
-  ModalBody } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Text,
+  VStack,
+  Badge,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+} from "@chakra-ui/react";
 import { fetchNotifications } from "@/services/notifications";
 import { markNotificationAsRead } from "@/services/notifications";
 import { auth } from "@/services/firebase";
@@ -58,7 +59,9 @@ const Notificacions = () => {
       )
     );
 
-    await markNotificationAsRead(notification.id);
+    console.log("Marking notification as read", notification.id);
+    console.log("User ID", userId);
+    await markNotificationAsRead(userId, notification.id);
 
     setSelectedNotification(notification);
     onOpen();
@@ -73,7 +76,8 @@ const Notificacions = () => {
         {Array.isArray(notifications) && notifications.length === 0 ? (
           <Text>No hay notificaciones</Text>
         ) : (
-          Array.isArray(notifications) && notifications.map((notification) => (
+          Array.isArray(notifications) &&
+          notifications.map((notification) => (
             <Box
               as="button"
               key={notification.id}

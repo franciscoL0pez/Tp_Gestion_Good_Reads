@@ -47,6 +47,7 @@ export async function fetchNotifications(uid) {
 
 export async function markNotificationAsRead(uid, notificationId) {
   try {
+    console.log("Marking notification as read", notificationId, uid);
     const notificationRef = doc(
       db,
       `users/${uid}/notifications/${notificationId}`
