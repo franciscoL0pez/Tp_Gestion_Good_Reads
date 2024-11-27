@@ -133,21 +133,23 @@ const createComment = async (reviewId, uid, content) => {
 };
 
 
-const updateComment = async (reviewId, commentId, newContent) => {
+const updateComment = async (commentId, newContent) => {
   try {
-    const response = await fetch(`/api/reviews/${reviewId}/comments/${commentId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ content: newContent }),
+    const commentRef = doc(db, "comments", commentId);
+    await updateDoc(commentRef, {
+      content: newContent,
     });
 
-    if (!response.ok) {
-      throw new Error("Error al actualizar el comentario");
-    }
+    const comment = await getDoc(commentRef);
 
-    return await response.json(); // Retorna el comentario actualizado
+    const user = await getUser(comment.data().uid);
+
+    return {
+      id: commentId,
+      ...comment.data(),
+      content: newContent,
+      user,
+    };
   } catch (error) {
     console.error("Error actualizando el comentario:", error);
     throw error;
@@ -157,45 +159,7 @@ const updateComment = async (reviewId, commentId, newContent) => {
 
 
 // Este es el editor para los comentarios
-const commentEditor = ({ commentId, initialContent, onSave }) => {
-  const [commentContent, setCommentContent] = useState(initialContent);
-  const [loading, setLoading] = useState(false);
 
-  const handleSaveComment = async () => {
-    if (!commentContent.trim()) return; // No guardar comentarios vacíos
-
-    setLoading(true);
-
-    try {
-      await onSave(commentId, commentContent); // Llamamos la función que guarda
-    } catch (error) {
-      console.error("Error al guardar el comentario:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Box mt={3}>
-      <Textarea
-        value={commentContent}
-        onChange={(e) => setCommentContent(e.target.value)}
-        placeholder="Edita tu comentario..."
-        h="100px"
-        resize="none"
-      />
-      <Flex justify="flex-end" mt={2}>
-        <Button
-          colorScheme="blue"
-          onClick={handleSaveComment}
-          isLoading={loading}
-        >
-          Guardar comentario
-        </Button>
-      </Flex>
-    </Box>
-  );
-};
 
 
 
@@ -242,4 +206,4 @@ const deleteComment = async (commentId) => {
   }
 };
 
-export { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,commentEditor,updateComment };
+export { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,updateComment };

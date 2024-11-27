@@ -22,9 +22,50 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
-import { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,commentEditor,  } from "@/services/reviews";
+import { createReview, updateReview, getReviews, deleteReview, createComment, getComments, deleteComment, updateComment } from "@/services/reviews";
 import { UserModal } from "@/services/users";
 import { updateDoc } from "firebase/firestore";
+
+
+ function CommentEditor({ commentId, initialContent, onSave, isOpen, onClose }) {
+  const [commentContent, setCommentContent] = useState(initialContent);
+  const [loading, setLoading] = useState(false);
+
+  const handleSaveComment = async () => {
+    if (!commentContent.trim()) return; // No guardar comentarios vacíos
+
+    setLoading(true);
+
+    try {
+      await onSave(commentId, commentContent); // Llamamos la función que guarda
+      onClose(); // Cerramos el editor
+    } catch (error) {
+      console.error("Error al guardar el comentario:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return isOpen && <Box mt={3}>
+      <Textarea
+        value={commentContent}
+        onChange={(e) => setCommentContent(e.target.value)}
+        placeholder="Edita tu comentario..."
+        h="100px"
+        resize="none"
+      />
+      <Flex justify="flex-end" mt={2}>
+        <Button
+          colorScheme="blue"
+          onClick={handleSaveComment}
+          isLoading={loading}
+        >
+          Guardar comentario
+        </Button>
+      </Flex>
+    </Box>
+  ;
+};
 
 const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
   const [user] = useAuthState(auth);
@@ -43,12 +84,12 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
 
   const handleToggleComments = async () => {
     setShowComments(!showComments);
-  
+
     if (!showComments) {
       // Si tengo que mostar los comentarios los cargo
       setLoadingComments(true);
       try {
-        const fetchedComments = await getComments(review.id); 
+        const fetchedComments = await getComments(review.id);
         setComments(fetchedComments);
       } catch (error) {
         console.error("Error loading comments:", error);
@@ -76,45 +117,44 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     try {
       const fetchedComments = await getComments(review.id);
       setComments(fetchedComments);
-    } catch (error) { 
+    } catch (error) {
       console.error("Error loading comments:", error);
     } finally {
       setLoadingComments(false);
     }
-    
+
   };
 
-  const handleEditComment = async (reviewId, commentId) => {
+  const [isCommentEditorOpen, setIsCommentEditorOpen] = useState(false);
+  const [commentToEdit, setCommentToEdit] = useState(null);
+
+  const onSave = async (commentId, newContent) => {
+    try {
+      // Llamamos a la función updateComment para actualizar el comentario en la base de datos
+      await updateComment(commentId, newContent);
+
+      // Actualizamos la lista de comentarios localmente
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === commentId ? { ...comment, content: newContent } : comment
+        )
+      );
+    } catch (error) {
+      console.error("Error actualizando el comentario:", error);
+    }
+  };
+
+
+  const handleEditComment = async (commentId) => {
+    console.log("Edit comment", commentId);
     const currentComment = comments.find((comment) => comment.id === commentId);
     if (!currentComment) return;
-  
-    // Función para guardar los cambios en el comentario
-    const onSave = async (commentId, newContent) => {
-      try {
-        // Llamamos a la función updateComment para actualizar el comentario en la base de datos
-        await updateComment(reviewId, commentId, newContent);
-  
-        // Actualizamos la lista de comentarios localmente
-        setComments((prevComments) =>
-          prevComments.map((comment) =>
-            comment.id === commentId ? { ...comment, content: newContent } : comment
-          )
-        );
-      } catch (error) {
-        console.error("Error actualizando el comentario:", error);
-      }
-    };
-  
-    return (
-      <commentEditor
-        commentId={commentId}
-        initialContent={currentComment.content}
-        onSave={onSave}
-      />
-    );
+
+    setIsCommentEditorOpen(true);
+    setCommentToEdit(currentComment);
   };
 
-  
+
   return (
     <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"} position="relative">
       <Avatar name={review?.user?.name + " " + review?.user?.lastName} src={review?.user?.photoURL} />
@@ -126,56 +166,58 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
           ))}
         </Flex>
         <Text fontSize={"14px"}>{review?.content}</Text>
-  
+
         <Button variant="link" onClick={handleToggleComments} colorScheme="blue">
           {showComments ? "Ocultar comentarios" : "Ver comentarios"}
         </Button>
-  
+
         {showComments && (
           <Box mt={3}>
             {loadingComments ? (
               <Text>Cargando comentarios...</Text>
             ) : comments.length ? (
               comments.map((comment) => (
-                <Flex 
-                  key={comment.id} 
-                  direction="column" 
-                  p={2} 
-                  borderWidth={1} 
-                  borderRadius="8px" 
-                  mb={2} 
+                <Flex
+                  key={comment.id}
+                  direction="column"
+                  p={2}
+                  borderWidth={1}
+                  borderRadius="8px"
+                  mb={2}
                   position="relative"
                 >
                   <Flex alignItems="center" mb={2}>
                     {/* Avatar del usuario */}
-                    <Avatar 
-                      name={comment?.user.name + " " + comment?.user.lastName} 
+                    <Avatar
+                      name={comment?.user.name + " " + comment?.user.lastName}
                       src={user.photoURL}
-                      size="sm" 
-                      mr={2} 
+                      size="sm"
+                      mr={2}
                     />
                     <Text fontWeight="bold">{comment.user.name + " " + comment.user.lastName}</Text>
                   </Flex>
                   <Text>{comment.content}</Text>
-  
+
                   {user?.uid === comment.uid && (
                     <Flex position="absolute" top="5px" right="5px" gap="5px">
                       {/* Botón de editar */}
                       <IconButton
-                        icon={<EditIcon />} 
+                        icon={<EditIcon />}
                         size="sm"
                         aria-label="Editar comentario"
                         colorScheme="green"
-                        onClick={() => handleEditComment(review.id, comment.id)} 
+                        onClick={() => handleEditComment(comment.id)}
                       />
-  
+                      
+                      
+
                       {/* Botón de eliminar */}
                       <IconButton
                         icon={<CloseIcon />}
                         size="sm"
                         aria-label="Eliminar comentario"
                         colorScheme="red"
-                        onClick={() => handleDeleteComment(comment.id)} 
+                        onClick={() => handleDeleteComment(comment.id)}
                       />
                     </Flex>
                   )}
@@ -186,7 +228,18 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
             )}
           </Box>
         )}
-  
+          
+            <CommentEditor
+                        commentId={commentToEdit?.id}
+                        initialContent={commentToEdit?.content}
+                        onSave={onSave}
+                        isOpen={isCommentEditorOpen}
+                        onClose={() => {
+                          setIsCommentEditorOpen(false)
+                          setCommentToEdit(null)
+                        }}
+                      />
+
         {/* Campo para agregar un nuevo comentario */}
         {user && (
           <Flex mt={3} direction="column">
@@ -198,10 +251,10 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
               resize={"none"}
               w={"100%"}
             />
-            <Button 
-              mt={2} 
-              colorScheme="blue" 
-              onClick={handleAddComment} 
+            <Button
+              mt={2}
+              colorScheme="blue"
+              onClick={handleAddComment}
               isLoading={loadingCommentCreation}
             >
               Comentar
@@ -209,7 +262,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
           </Flex>
         )}
       </Flex>
-  
+
       {user?.uid === review?.user?.uid && (
         <IconButton
           icon={<CloseIcon />}
@@ -219,13 +272,13 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
           right="5px"
           aria-label="Eliminar reseña"
           colorScheme="red"
-          onClick={() => onDelete(review.id)} 
+          onClick={() => onDelete(review.id)}
         />
       )}
     </Flex>
   );
-  
-};  
+
+};
 
 
 
@@ -322,15 +375,15 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
     const updatedReviews = reviews.map((review) => {
       // Asegurarse de que cada reseña tenga un array de comentarios
       const updatedComments = review.comments ? [...review.comments, newComment] : [newComment];
-      
+
       return review.id === newComment.reviewId
         ? { ...review, comments: updatedComments }
         : review;
     });
-    
+
     onEdit({ ...book, reviews: updatedReviews });
   };
-  
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={"5xl"} scrollBehavior={"inside"}>
