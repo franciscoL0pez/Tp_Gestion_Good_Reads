@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Flex,
@@ -23,8 +23,9 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
 import { auth } from "@/services/firebase";
+import { getUnreadNotificationsOnSnapshot } from "@/services/notifications";
 
-const MenuLink = ({ href, children: icon, title }) => {
+const MenuLink = ({ href, children: icon, title, hasUnread }) => {
   const pathname = usePathname();
   const isActive = pathname === href;
 
@@ -46,9 +47,21 @@ const MenuLink = ({ href, children: icon, title }) => {
         _active={{
           transform: "scale(0.98)",
         }}
+        position="relative"
       >
         {icon}
         {title}
+        {hasUnread && (
+          <Box
+            position="absolute"
+            top="5px"
+            right="5px"
+            width="10px"
+            height="10px"
+            bg="red.500"
+            borderRadius="50%"
+          />
+        )}
       </Flex>
     </Link>
   );
@@ -57,6 +70,18 @@ const MenuLink = ({ href, children: icon, title }) => {
 const Menu = () => {
   const { isOpen, onToggle } = useDisclosure(); // Usando useDisclosure para manejar el menú móvil
   const [isHovered, setIsHovered] = useState(false); // Para manejar el hover del icono de menú
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    const listener = getUnreadNotificationsOnSnapshot(
+      auth.currentUser?.uid,
+      (unread) => {
+        setHasUnread(unread.length > 0);
+      }
+    );
+
+    return () => listener();
+  }, []);
 
   return (
     <Flex
@@ -128,7 +153,11 @@ const Menu = () => {
         <MenuLink href="/home/profile" title="Perfil">
           <User size="28" color="black" />
         </MenuLink>
-        <MenuLink href="/home/notifications" title="Notificaciones">
+        <MenuLink
+          href="/home/notifications"
+          title="Notificaciones"
+          hasUnread={hasUnread}
+        >
           <Notification size="28" color="black" />
         </MenuLink>
       </Flex>

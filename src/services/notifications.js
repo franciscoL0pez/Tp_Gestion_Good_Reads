@@ -9,6 +9,7 @@ import {
   orderBy,
   doc,
   updateDoc,
+  onSnapshot,
 } from "firebase/firestore";
 
 export async function addNotification(uid, message) {
@@ -88,12 +89,11 @@ export async function sendReviewNotification(followedUid, followerName) {
       read: false,
       date: serverTimestamp(),
     });
-    console.log(message)
+    console.log(message);
   } catch (error) {
     console.error(error);
   }
 }
-
 
 export async function sendCommentNotification(followedUid, followerName) {
   try {
@@ -107,8 +107,25 @@ export async function sendCommentNotification(followedUid, followerName) {
       read: false,
       date: serverTimestamp(),
     });
-    console.log(message)
+    console.log(message);
   } catch (error) {
     console.error(error);
   }
+}
+
+export function getUnreadNotificationsOnSnapshot(uid, callback) {
+  const notificationsRef = collection(db, `users/${uid}/notifications`);
+  const q = query(notificationsRef, orderBy("date", "desc"));
+
+  return onSnapshot(q, (querySnapshot) => {
+    const notifications = [];
+    querySnapshot.forEach((doc) => {
+      const notification = doc.data();
+      notification.id = doc.id;
+      notifications.push(notification);
+    });
+
+    const unreadNotifications = notifications.filter((n) => !n.read);
+    callback(unreadNotifications);
+  });
 }
