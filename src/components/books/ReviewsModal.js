@@ -149,8 +149,8 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
                   <Flex alignItems="center" mb={2}>
                     {/* Avatar del usuario */}
                     <Avatar 
-                      name={comment.user.name + " " + comment.user.lastName} 
-                      src={comment.user.photoURL} 
+                      name={comment?.user.name + " " + comment?.user.lastName} 
+                      src={user.photoURL}
                       size="sm" 
                       mr={2} 
                     />

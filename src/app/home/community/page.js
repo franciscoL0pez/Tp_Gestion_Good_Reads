@@ -205,7 +205,7 @@ export default function CommunityPage() {
                 </Button>
                 <Avatar
                   name={`${selectedUser.name} ${selectedUser.lastName}`}
-                  src={selectedUser.photoURL}
+                  
                   h={"400px"}
                   w={"400px"}
                 />
