@@ -27,24 +27,21 @@ export async function addNotification(uid, message) {
 
 export async function fetchNotifications(uid) {
   try {
-    // const notifications = [
-    //     { id: 1, message: "La minita que te gusta comenzó a seguirte", read: false },
-    //     { id: 2, message: "A Lionel Messi le gustó tu reseña", read: false },
-    //     { id: 3, message: "Lionel Messi comenzó a seguirte", read: false },
-    // ];
-
+    // fetch the notifications from the database at the path `users/${uid}/notifications`
     const notificationsRef = collection(db, `users/${uid}/notifications`);
-    const query = query(notificationsRef, orderBy("timestamp", "desc"));
-    const querySnapshot = await getDocs(query);
 
-    const notifications = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const q = query(notificationsRef, orderBy("date", "desc"));
+    const querySnapshot = await getDocs(q);
+    const notifications = [];
+    querySnapshot.forEach((doc) => {
+      const notification = doc.data();
+      notification.id = doc.id;
+      notifications.push(notification);
+    });
 
     return notifications;
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching notifications:", error);
   }
 }
 
