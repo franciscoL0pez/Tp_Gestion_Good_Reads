@@ -94,3 +94,21 @@ export async function sendReviewNotification(followedUid, followerName) {
   }
 }
 
+
+export async function sendCommentNotification(followedUid, followerName) {
+  try {
+    const notificationsRef = collection(
+      db,
+      `users/${followedUid}/notifications`
+    );
+
+    await addDoc(notificationsRef, {
+      message: `${followerName} te ha dejado un comentario`,
+      read: false,
+      date: serverTimestamp(),
+    });
+    console.log(message)
+  } catch (error) {
+    console.error(error);
+  }
+}
