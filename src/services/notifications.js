@@ -33,14 +33,20 @@ export async function addNotification(uid, message) {
 export async function fetchNotifications(uid){
     try {
 
-        const notificationsRef = collection(db, `users/${uid}/notifications`);
+        const notifications = [
+            { id: 1, message: "La minita que te gusta comenzó a seguirte", read: false },
+            { id: 2, message: "A Lionel Messi le gustó tu reseña", read: false },
+            { id: 3, message: "Lionel Messi comenzó a seguirte", read: false },
+        ];
+
+        /*const notificationsRef = collection(db, `users/${uid}/notifications`);
         const query = query(notificationsRef, orderBy("timestamp", "desc"));
         const querySnapshot = await getDocs(query);
 
         const notifications = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-          }));
+          }));*/
         
         return notifications;
 
