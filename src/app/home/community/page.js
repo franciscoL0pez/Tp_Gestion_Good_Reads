@@ -12,6 +12,7 @@ import {
 import { useUsers } from "@/hooks/useUsers";
 import { useUserData } from "@/hooks/useUserData";
 import { updateUser } from "@/services/users";
+import { sendFollowNotification } from "@/services/notifications";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowBackIcon } from "@chakra-ui/icons";
@@ -109,6 +110,8 @@ export default function CommunityPage() {
       following: [...userData.following, uid],
     });
 
+    await sendFollowNotification(uid, userData.name);
+
     setUserData({
       ...userData,
       following: [...userData.following, uid],
@@ -123,7 +126,7 @@ export default function CommunityPage() {
         return {
           ...user,
           followers: user.followers.filter(
-            (follower) => follower !== userData.uid,
+            (follower) => follower !== userData.uid
           ),
         };
       }
