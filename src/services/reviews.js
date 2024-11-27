@@ -11,8 +11,9 @@ import {
   where,
 } from "firebase/firestore";
 import { getUser } from "@/services/users";
+import { sendReviewNotification } from "@/services/notifications";
 
-const createReview = async (bookId, uid, rating, content) => {
+const createReview = async (bookId, uid, rating, content, userName) => {
   try {
     const reviewRef = await addDoc(collection(db, "reviews"), {
       bookId,
@@ -23,6 +24,7 @@ const createReview = async (bookId, uid, rating, content) => {
     const reviewId = reviewRef.id;
 
     const user = await getUser(uid);
+    await sendReviewNotification(uid, userName);
 
     return {
       id: reviewId,
@@ -37,6 +39,7 @@ const createReview = async (bookId, uid, rating, content) => {
     return null;
   }
 };
+
 
 const updateReview = async (reviewId, rating, content) => {
   try {

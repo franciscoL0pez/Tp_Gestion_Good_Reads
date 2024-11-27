@@ -47,7 +47,6 @@ export async function fetchNotifications(uid) {
 
 export async function markNotificationAsRead(uid, notificationId) {
   try {
-    console.log("Marking notification as read", notificationId, uid);
     const notificationRef = doc(
       db,
       `users/${uid}/notifications/${notificationId}`
@@ -76,3 +75,22 @@ export async function sendFollowNotification(followedUid, followerName) {
     console.error(error);
   }
 }
+
+export async function sendReviewNotification(followedUid, followerName) {
+  try {
+    const notificationsRef = collection(
+      db,
+      `users/${followedUid}/notifications`
+    );
+
+    await addDoc(notificationsRef, {
+      message: `${followerName} te ha dejado una reseña`,
+      read: false,
+      date: serverTimestamp(),
+    });
+    console.log(message)
+  } catch (error) {
+    console.error(error);
+  }
+}
+

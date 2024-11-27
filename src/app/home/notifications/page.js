@@ -59,8 +59,7 @@ const Notificacions = () => {
       )
     );
 
-    console.log("Marking notification as read", notification.id);
-    console.log("User ID", userId);
+    
     await markNotificationAsRead(userId, notification.id);
 
     setSelectedNotification(notification);
