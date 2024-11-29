@@ -22,12 +22,20 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/services/firebase";
-import { createReview, updateReview, getReviews, deleteReview, createComment, getComments, deleteComment, updateComment } from "@/services/reviews";
+import {
+  createReview,
+  updateReview,
+  getReviews,
+  deleteReview,
+  createComment,
+  getComments,
+  deleteComment,
+  updateComment,
+} from "@/services/reviews";
 import { UserModal } from "@/services/users";
 import { updateDoc } from "firebase/firestore";
 
-
- function CommentEditor({ commentId, initialContent, onSave, isOpen, onClose }) {
+function CommentEditor({ commentId, initialContent, onSave, isOpen, onClose }) {
   const [commentContent, setCommentContent] = useState(initialContent);
   const [loading, setLoading] = useState(false);
 
@@ -46,26 +54,29 @@ import { updateDoc } from "firebase/firestore";
     }
   };
 
-  return isOpen && <Box mt={3}>
-      <Textarea
-        value={commentContent}
-        onChange={(e) => setCommentContent(e.target.value)}
-        placeholder="Edita tu comentario..."
-        h="100px"
-        resize="none"
-      />
-      <Flex justify="flex-end" mt={2}>
-        <Button
-          colorScheme="blue"
-          onClick={handleSaveComment}
-          isLoading={loading}
-        >
-          Guardar comentario
-        </Button>
-      </Flex>
-    </Box>
-  ;
-};
+  return (
+    isOpen && (
+      <Box mt={3}>
+        <Textarea
+          value={commentContent}
+          onChange={(e) => setCommentContent(e.target.value)}
+          placeholder="Edita tu comentario..."
+          h="100px"
+          resize="none"
+        />
+        <Flex justify="flex-end" mt={2}>
+          <Button
+            colorScheme="blue"
+            onClick={handleSaveComment}
+            isLoading={loading}
+          >
+            Guardar comentario
+          </Button>
+        </Flex>
+      </Box>
+    )
+  );
+}
 
 const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
   const [user] = useAuthState(auth);
@@ -103,7 +114,12 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     if (!newComment.trim()) return; // Validar que el comentario no esté vacío
 
     setLoadingCommentCreation(true);
-    const createdComment = await createComment(review.id, user.uid, newComment);
+    const createdComment = await createComment(
+      review.id,
+      user.uid,
+      newComment,
+      review.user.uid,
+    );
     setComments([...comments, createdComment]); // Agregar el nuevo comentario al estado
     setNewComment(""); // Limpiar el campo del comentario
     onCommentAdded(createdComment); // Llamar a la función onCommentAdded si se pasa
@@ -122,7 +138,6 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     } finally {
       setLoadingComments(false);
     }
-
   };
 
   const [isCommentEditorOpen, setIsCommentEditorOpen] = useState(false);
@@ -136,14 +151,15 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
       // Actualizamos la lista de comentarios localmente
       setComments((prevComments) =>
         prevComments.map((comment) =>
-          comment.id === commentId ? { ...comment, content: newContent } : comment
-        )
+          comment.id === commentId
+            ? { ...comment, content: newContent }
+            : comment,
+        ),
       );
     } catch (error) {
       console.error("Error actualizando el comentario:", error);
     }
   };
-
 
   const handleEditComment = async (commentId) => {
     console.log("Edit comment", commentId);
@@ -154,20 +170,40 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
     setCommentToEdit(currentComment);
   };
 
-
   return (
-    <Flex bg={"gray.100"} p={"15px"} borderRadius={"10px"} w={"100%"} position="relative">
-      <Avatar name={review?.user?.name + " " + review?.user?.lastName} src={review?.user?.photoURL} />
-      <Flex direction={"column"} ml={"10px"} gap={"4px"}>
-        <Text fontSize={"16px"} fontWeight={"bold"}>{review?.user?.name + " " + review?.user?.lastName}</Text>
+    <Flex
+      bg={"gray.100"}
+      p={"15px"}
+      borderRadius={"10px"}
+      w={"100%"}
+      position="relative"
+    >
+      <Avatar
+        name={review?.user?.name + " " + review?.user?.lastName}
+        src={review?.user?.photoURL}
+      />
+      <Flex direction={"column"} ml={"10px"} gap={"4px"} w={"100%"}>
+        <Text fontSize={"16px"} fontWeight={"bold"}>
+          {review?.user?.name + " " + review?.user?.lastName}
+        </Text>
         <Flex>
           {[1, 2, 3, 4, 5].map((i) => (
-            <Star1 key={i} variant={"Bold"} size={"16"} opacity={i <= review?.rating ? 1 : 0.3} color={"gold"} />
+            <Star1
+              key={i}
+              variant={"Bold"}
+              size={"16"}
+              opacity={i <= review?.rating ? 1 : 0.3}
+              color={"gold"}
+            />
           ))}
         </Flex>
         <Text fontSize={"14px"}>{review?.content}</Text>
 
-        <Button variant="link" onClick={handleToggleComments} colorScheme="blue">
+        <Button
+          variant="link"
+          onClick={handleToggleComments}
+          colorScheme="blue"
+        >
           {showComments ? "Ocultar comentarios" : "Ver comentarios"}
         </Button>
 
@@ -190,11 +226,13 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
                     {/* Avatar del usuario */}
                     <Avatar
                       name={comment?.user.name + " " + comment?.user.lastName}
-                      src={user.photoURL}
+                      src={comment.user.photoURL}
                       size="sm"
                       mr={2}
                     />
-                    <Text fontWeight="bold">{comment.user.name + " " + comment.user.lastName}</Text>
+                    <Text fontWeight="bold">
+                      {comment.user.name + " " + comment.user.lastName}
+                    </Text>
                   </Flex>
                   <Text>{comment.content}</Text>
 
@@ -208,8 +246,6 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
                         colorScheme="green"
                         onClick={() => handleEditComment(comment.id)}
                       />
-                      
-                      
 
                       {/* Botón de eliminar */}
                       <IconButton
@@ -228,21 +264,21 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
             )}
           </Box>
         )}
-          
-            <CommentEditor
-                        commentId={commentToEdit?.id}
-                        initialContent={commentToEdit?.content}
-                        onSave={onSave}
-                        isOpen={isCommentEditorOpen}
-                        onClose={() => {
-                          setIsCommentEditorOpen(false)
-                          setCommentToEdit(null)
-                        }}
-                      />
+
+        <CommentEditor
+          commentId={commentToEdit?.id}
+          initialContent={commentToEdit?.content}
+          onSave={onSave}
+          isOpen={isCommentEditorOpen}
+          onClose={() => {
+            setIsCommentEditorOpen(false);
+            setCommentToEdit(null);
+          }}
+        />
 
         {/* Campo para agregar un nuevo comentario */}
         {user && (
-          <Flex mt={3} direction="column">
+          <Flex mt={3} direction="column" w={"100%"}>
             <Textarea
               placeholder="Escribe tu comentario aquí"
               value={newComment}
@@ -277,10 +313,7 @@ const ReviewItem = ({ review, onDelete, onCommentAdded }) => {
       )}
     </Flex>
   );
-
 };
-
-
 
 const ReviewEditor = ({ book, review, onEdit }) => {
   const [user] = useAuthState(auth);
@@ -374,7 +407,9 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
   const handleCommentAdded = (newComment) => {
     const updatedReviews = reviews.map((review) => {
       // Asegurarse de que cada reseña tenga un array de comentarios
-      const updatedComments = review.comments ? [...review.comments, newComment] : [newComment];
+      const updatedComments = review.comments
+        ? [...review.comments, newComment]
+        : [newComment];
 
       return review.id === newComment.reviewId
         ? { ...review, comments: updatedComments }
@@ -384,9 +419,13 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
     onEdit({ ...book, reviews: updatedReviews });
   };
 
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"5xl"} scrollBehavior={"inside"}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={"5xl"}
+      scrollBehavior={"inside"}
+    >
       <ModalOverlay />
       <ModalContent margin={"auto"} pb={"20px"}>
         <ModalCloseButton />
@@ -396,7 +435,11 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
         <ModalBody display={"flex"} gap={"20px"}>
           {!isBookOwner && (
             <Flex w={"49%"}>
-              <ReviewEditor review={reviews.find((review) => review.uid === user.uid)} book={book} onEdit={onEdit} />
+              <ReviewEditor
+                review={reviews.find((review) => review.uid === user.uid)}
+                book={book}
+                onEdit={onEdit}
+              />
             </Flex>
           )}
           <Flex
@@ -408,10 +451,20 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
             minH={"400px"}
           >
             {reviews.map((review) => (
-              <ReviewItem key={review.id} review={review} onDelete={handleDelete} onCommentAdded={handleCommentAdded} />
+              <ReviewItem
+                key={review.id}
+                review={review}
+                onDelete={handleDelete}
+                onCommentAdded={handleCommentAdded}
+              />
             ))}
             {!reviews.length && (
-              <Box display={"flex"} alignItems={"center"} justifyContent={"center"} h={"100%"}>
+              <Box
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
+                h={"100%"}
+              >
                 <Text fontSize={"20px"} textAlign={"center"} mb={"60px"}>
                   Todavía no hay reseñas para este libro.
                 </Text>
@@ -423,6 +476,5 @@ const ReviewsModal = ({ book, isOpen, onClose, onEdit }) => {
     </Modal>
   );
 };
-
 
 export default ReviewsModal;

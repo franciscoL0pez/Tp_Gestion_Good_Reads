@@ -11,9 +11,13 @@ import {
   where,
 } from "firebase/firestore";
 import { getUser } from "@/services/users";
-import { sendReviewNotification } from "@/services/notifications";
+import {
+  sendCommentNotification,
+  sendReviewNotification,
+} from "@/services/notifications";
+import { getBook } from "@/services/books";
 
-const createReview = async (bookId, uid, rating, content, userName) => {
+const createReview = async (bookId, uid, rating, content) => {
   try {
     const reviewRef = await addDoc(collection(db, "reviews"), {
       bookId,
@@ -23,8 +27,10 @@ const createReview = async (bookId, uid, rating, content, userName) => {
     });
     const reviewId = reviewRef.id;
 
+    const book = await getBook(bookId);
+    const authorId = book.author.uid;
     const user = await getUser(uid);
-    await sendReviewNotification(uid, userName);
+    await sendReviewNotification(authorId, user.name);
 
     return {
       id: reviewId,
@@ -39,7 +45,6 @@ const createReview = async (bookId, uid, rating, content, userName) => {
     return null;
   }
 };
-
 
 const updateReview = async (reviewId, rating, content) => {
   try {
@@ -94,22 +99,20 @@ const getReviews = async (bookId) => {
   }
 };
 
-
 //Creo un delete para eliminar la reseña
 const deleteReview = async (reviewId) => {
   try {
     const reviewRef = doc(db, "reviews", reviewId);
     await deleteDoc(reviewRef);
-    return true; 
+    return true;
   } catch (e) {
     console.error("Error deleting document:", e);
-    return false; 
+    return false;
   }
 };
 
-
 /// ----------- Comments --------------- ///
-const createComment = async (reviewId, uid, content) => {
+const createComment = async (reviewId, uid, content, reviewUid) => {
   try {
     const commentRef = await addDoc(collection(db, "comments"), {
       reviewId,
@@ -120,6 +123,8 @@ const createComment = async (reviewId, uid, content) => {
     const commentId = commentRef.id;
 
     const user = await getUser(uid);
+
+    await sendCommentNotification(reviewUid, user.name);
 
     return {
       id: commentId,
@@ -134,7 +139,6 @@ const createComment = async (reviewId, uid, content) => {
     return null;
   }
 };
-
 
 const updateComment = async (commentId, newContent) => {
   try {
@@ -159,14 +163,7 @@ const updateComment = async (commentId, newContent) => {
   }
 };
 
-
-
 // Este es el editor para los comentarios
-
-
-
-
-
 
 const getComments = async (reviewId) => {
   try {
@@ -189,14 +186,13 @@ const getComments = async (reviewId) => {
           ...comment,
           user,
         };
-      })
+      }),
     );
   } catch (e) {
     console.error("Error getting comments:", e);
     return [];
   }
 };
-
 
 const deleteComment = async (commentId) => {
   try {
@@ -209,4 +205,13 @@ const deleteComment = async (commentId) => {
   }
 };
 
-export { createReview, updateReview, getReviews, deleteReview , createComment, getComments, deleteComment,updateComment };
+export {
+  createReview,
+  updateReview,
+  getReviews,
+  deleteReview,
+  createComment,
+  getComments,
+  deleteComment,
+  updateComment,
+};

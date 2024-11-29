@@ -50,7 +50,7 @@ export async function markNotificationAsRead(uid, notificationId) {
   try {
     const notificationRef = doc(
       db,
-      `users/${uid}/notifications/${notificationId}`
+      `users/${uid}/notifications/${notificationId}`,
     );
     await updateDoc(notificationRef, {
       read: true,
@@ -64,7 +64,7 @@ export async function sendFollowNotification(followedUid, followerName) {
   try {
     const notificationsRef = collection(
       db,
-      `users/${followedUid}/notifications`
+      `users/${followedUid}/notifications`,
     );
 
     await addDoc(notificationsRef, {
@@ -81,15 +81,14 @@ export async function sendReviewNotification(followedUid, followerName) {
   try {
     const notificationsRef = collection(
       db,
-      `users/${followedUid}/notifications`
+      `users/${followedUid}/notifications`,
     );
 
-    await addDoc(notificationsRef, {
+    const response = await addDoc(notificationsRef, {
       message: `${followerName} te ha dejado una reseña`,
       read: false,
       date: serverTimestamp(),
     });
-    console.log(message);
   } catch (error) {
     console.error(error);
   }
@@ -99,7 +98,7 @@ export async function sendCommentNotification(followedUid, followerName) {
   try {
     const notificationsRef = collection(
       db,
-      `users/${followedUid}/notifications`
+      `users/${followedUid}/notifications`,
     );
 
     await addDoc(notificationsRef, {
@@ -107,7 +106,6 @@ export async function sendCommentNotification(followedUid, followerName) {
       read: false,
       date: serverTimestamp(),
     });
-    console.log(message);
   } catch (error) {
     console.error(error);
   }

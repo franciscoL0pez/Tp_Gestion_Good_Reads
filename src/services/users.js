@@ -26,12 +26,23 @@ const getUser = async (uid) => {
     const q = query(collectionRef, where("uid", "==", uid));
 
     const querySnapshot = await getDocs(q);
+    const storageRef = ref(storage, `users/${uid}/profile`);
+
+    let imageUrl;
+
+    try {
+      imageUrl = await getDownloadURL(storageRef);
+    } catch (error) {
+      imageUrl =
+        "https://firebasestorage.googleapis.com/v0/b/login-29a91.appspot.com/o/users%2Fdefault_profile_pic.jpg?alt=media&token=eec674ba-42a5-43ba-98dc-8198183a3530";
+    }
 
     const users = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
       followers: doc.data().followers || [],
       following: doc.data().following || [],
+      photoURL: imageUrl,
     }));
     return users[0];
   } catch (e) {
